@@ -1,0 +1,141 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Sellers" %}{% endblock title %}
+
+{% block extra_css %}
+
+<!-- third party css -->
+<link
+  href="{% static 'css/vendor/dataTables.bootstrap5.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<link
+  href="{% static 'css/vendor/responsive.bootstrap5.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/><!-- third party css end -->
+
+{% endblock %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">Hyper</a></li>
+                        <li class="breadcrumb-item"><a href="javascript: void(0);">eCommerce</a></li>
+                        <li class="breadcrumb-item active">Sellers</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Sellers</h4>
+            </div>
+        </div>
+    </div>     
+    <!-- end page title --> 
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <a href="javascript:void(0);" class="btn btn-danger mb-2"><i class="mdi mdi-plus-circle me-2"></i> Add Sellers</a>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="text-sm-end">
+                                <button type="button" class="btn btn-success mb-2 me-1"><i class="mdi mdi-cog"></i></button>
+                                <button type="button" class="btn btn-light mb-2 me-1">Import</button>
+                                <button type="button" class="btn btn-light mb-2">Export</button>
+                            </div>
+                        </div><!-- end col-->
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-centered table-borderless table-hover w-100 dt-responsive nowrap" id="products-datatable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 20px;">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="customCheck1">
+                                            <label class="form-check-label" for="customCheck1">&nbsp;</label>
+                                        </div>
+                                    </th>
+                                    <th>Seller</th>
+                                    <th>Store Name</th>
+                                    <th>Products</th>
+                                    <th>Wallet Balance</th>
+                                    <th>Create Date</th>
+                                    <th>Revenue</th>
+                                    <th style="width: 75px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for data in sellers %}
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" id="customCheck{{data.id}}">
+                                            <label class="form-check-label" for="customCheck{{data.id}}">&nbsp;</label>
+                                        </div>
+                                    </td>
+                                    <td class="table-user">
+                                        <img src="{{data.avatar}}" alt="table-user" class="me-2 rounded-circle">
+                                        <a href="javascript:void(0);" class="text-body fw-semibold">{{data.name}}</a>
+                                    </td>
+                                    <td>
+                                        {{data.store_name}}
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold">{{data.products}}</span>
+                                    </td>
+                                    <td>
+                                        {{data.wallet_balance}}
+                                    </td>
+                                    <td>
+                                        {{data.create_date}}
+                                    </td>
+                                    <td>
+                                        <div class="spark-chart" data-dataset="{{data.revenue}}"></div>
+                                    </td>
+
+                                    <td>
+                                        <a href="javascript:void(0);" class="action-icon"> <i class="mdi mdi-square-edit-outline"></i></a>
+                                        <a href="javascript:void(0);" class="action-icon"> <i class="mdi mdi-delete"></i></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}  
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- end card-body-->
+            </div> <!-- end card-->
+        </div> <!-- end col -->
+    </div>
+    <!-- end row -->
+    
+</div> <!-- container -->
+{% endblock %}
+
+{% block extra_javascript %}
+
+<!-- Third party js -->
+<script src="{% static 'js/vendor/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'js/vendor/dataTables.bootstrap5.js' %}"></script>
+<script src="{% static 'js/vendor/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'js/vendor/responsive.bootstrap5.min.js' %}"></script>
+<script src="{% static 'js/vendor/apexcharts.min.js' %}"></script>
+<script src="{% static 'js/vendor/dataTables.checkboxes.min.js' %}"></script>
+<!-- Third party js ends -->
+
+<!-- Init js -->
+<script src="{% static 'js/pages/demo.sellers.js' %}"></script>
+<!-- Init js end -->
+
+{% endblock %}

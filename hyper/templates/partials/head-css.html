@@ -1,0 +1,37 @@
+{% load static i18n %}
+
+{% if rtl %}
+    {% if demo == "creative" %}
+    <!-- App css -->
+    <link href="{% static 'css/app-creative-rtl.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-creative-dark-rtl.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+
+    {% elif demo == "modern" %}
+    <!-- App css -->
+    <link href="{% static 'css/app-modern-rtl.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-modern-dark-rtl.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+
+    {% else %}
+    <!-- App css -->
+    <link href="{% static 'css/app-rtl.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-dark-rtl.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+    
+    {% endif %}
+{% else %}
+    {% if demo == "creative" %}
+    <!-- App css -->
+    <link href="{% static 'css/app-creative.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-creative-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+
+    {% elif demo == "modern" %}
+    <!-- App css -->
+    <link href="{% static 'css/app-modern.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-modern-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+
+    {% else %}
+    <!-- App css -->
+    <link href="{% static 'css/app-dark.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+    <link href="{% static 'css/app-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+    
+    {% endif %}
+{% endif %}

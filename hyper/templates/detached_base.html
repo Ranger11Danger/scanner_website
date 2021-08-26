@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block extra_css %}{% endblock %}
+
+{% block body_extra %}
+
+class="loading" data-layout="detached" data-layout-config='{"layoutBoxed":false, "leftSidebarCondensed":false,
+"leftSidebarScrollable":false,"darkMode":{% if dark %}true{% else %}false{% endif %}, "showRightSidebarOnStart": true}'
+"showRightSidebarOnPageLoad": true}'
+
+{% endblock %}
+
+
+{% block page_content %}
+
+{% include 'partials/topbar-dark.html' %}
+
+<!-- ============================================================== -->
+<!-- Start Page Content here -->
+<!-- ============================================================== -->
+
+<!-- Start Content-->
+<div class="container-fluid">
+
+    <!-- Begin page -->
+    <div class="wrapper">
+
+        {% include 'partials/detached-left-sidebar.html' %}
+
+        <div class="content-page">
+
+            {% block content %}
+
+            {% endblock %}
+
+            {% include 'partials/footer.html' %}
+
+
+        </div>
+        <!-- content-page -->
+
+        <!-- ============================================================== -->
+        <!-- End Page content -->
+        <!-- ============================================================== -->
+    </div> <!-- end wrapper-->
+</div>
+<!-- END Container -->
+
+{% endblock %}
+
+{% include 'partials/right-sidebar.html' %}
+
+{% block extra_javascript %}{% endblock %}

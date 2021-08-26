@@ -1,0 +1,52 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right"></div>
+                <h1 class="page-title">Scan Results</h4>
+            </div>
+        </div>
+    </div>
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+                <div class="col">
+                    <div class="card titlebox-one">
+                        <div class="card-body">
+                            <i class='mdi mdi-bug-outline float-end' style="font-size: 35px;"></i>
+                            <h4 class="card-title text-uppercase">CVE's Found</h4>
+                            <h3>{{ data_length }}</h3>
+                        </div> <!-- end card-body-->
+                    </div>
+                 </div>
+                <div class="col">
+                    <div class="card titlebox-one">
+                        <div class="card-body">
+                            <i class='mdi mdi-laptop-windows float-end' style="font-size: 35px;"></i>
+                            <h4 class="text-uppercase card-title"> IP's Scanned</h4>
+                            <h3>{{ scan_num }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- end page title --> 
+    <ul>
+    {% for scan in scans %}
+       <li> <a href="/dashboard/scan/{{ scan.slug }}">{{ scan.slug }}</a></li>
+    {% endfor %}
+    </ul>
+</div> <!-- container -->
+{% endblock %}
+

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block extra_css %}{% endblock %}
+
+{% block body_extra %}
+
+class="loading" data-layout="topnav"
+data-layout-config='{"layoutBoxed":false,"darkMode":{% if dark %}true{% else %}false{% endif %},"showRightSidebarOnStart": true}'
+data-layout-mode="{% if data_layout_mode %}{{data_layout_mode}}{% else %}fluid{% endif %}"
+
+{% endblock %}
+
+{% block page_content %}
+
+<!-- Begin page -->
+<div class="wrapper">
+
+    <!-- ============================================================== -->
+    <!-- Start Page Content here -->
+    <!-- ============================================================== -->
+
+    <div class="content-page">
+        <div class="content">
+            {% include 'partials/horizontal-nav.html' %}
+
+            {% block content %}
+
+            {% endblock %}
+
+        </div>
+
+        <!-- Footer -->
+
+        {% include 'partials/footer.html' %}
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- End Page content -->
+    <!-- ============================================================== -->
+
+</div>
+<!-- END wrapper -->
+
+<!-- Right Sidebar -->
+
+{% include 'partials/right-sidebar.html' %}
+
+
+{% endblock %}
+
+{% block extra_javascript %}{% endblock %}
