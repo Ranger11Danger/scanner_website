@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import TemplateView
 from .forms import ScanForm, RenameScanForm
-from hyper.utils.general import list_scans, add_scan,select_scans,clear_scans,select_slug,get_db_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips
+from hyper.utils.general import list_scans, clear_all_scans,add_scan,select_scans,clear_scans,select_slug,get_scan_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips,clear_all_ports
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
 
@@ -29,10 +29,10 @@ class ScanDetailsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
-        selected_scan = select_slug(self.kwargs['slug'],self.request.user.id)
+        selected_scan = select_slug(self.kwargs['slug'][5:],self.request.user.id)
         context['scan'] = selected_scan
         if len(selected_scan) >= 1:
-            context['data'] = get_db_data(self.kwargs['slug'], self.request.user.id)
+            context['data'] = get_scan_data(self.kwargs['slug'][5:], self.request.user.id)
         return context   
 class CveDetailsView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/cve_details.html"
@@ -40,7 +40,7 @@ class CveDetailsView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         scan_id = self.kwargs['slug']
         cve_id = self.kwargs['cveid']
-        context['cve'] = get_cve(scan_id,cve_id,self.request.user.id)
+        context['cve'] = get_cve(scan_id[5:],cve_id,self.request.user.id)
         return context
 
 class ScanView(LoginRequiredMixin, TemplateView):
@@ -55,7 +55,10 @@ class ScanView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             context['name'] = form.cleaned_data['name']
             context['address'] = clense_ips(form.cleaned_data['address'])
-            context['task_id'] = convert_scan_to_model(form.cleaned_data['name'])
+            context['scan_name'] = form.cleaned_data['scan_name']
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'])
+            context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            
 
         return self.render_to_response(context)
 
@@ -72,8 +75,13 @@ class ScanManageView(LoginRequiredMixin, TemplateView):
         form = RenameScanForm(request.POST)
         if form.is_valid():
             context['new_name'] = form.cleaned_data['name']
+            scan = select_slug(self.kwargs['slug'][5:], request.user.id)
+            scan.update(name=form.cleaned_data['name'])
+            
+            return redirect(f"/scan/{self.kwargs['slug']}")
         if request.POST.get('delete'):
-            clear_ports()
+            clear_ports(request.user.id, self.kwargs['slug'][5:])
+            clear_scans(request.user.id, self.kwargs['slug'][5:])
             return redirect('/')
         return self.render_to_response(context)
 

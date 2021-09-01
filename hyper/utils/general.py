@@ -69,7 +69,7 @@ def make_chuncks_of_number_of_elements(element_per_chunk, data_list):
     return [data_list[i:i + element_per_chunk] for i in range(0, len(data_list), element_per_chunk)]
 
 
-def get_db_data(slug,user):
+def get_scan_data(slug,user):
     data = port_info.objects.filter(scan_id=slug).filter(user=user)
     return(data)
 
@@ -81,21 +81,28 @@ def list_scans():
     scans = scan.objects.all()
     return(scans)
 
-def add_scan(user, name, slug):
+def add_scan(user, name):
     new_scan = scan()
     new_scan.user = user
     new_scan.name = name
-    new_scan.slug = slug
+    new_scan.slug = f"scan-{new_scan.uuid}"
     new_scan.save()
+    return new_scan.slug
 
-def clear_scans():
-    scan.objects.all().delete()
+def clear_scans(user, uuid):
+    scan.objects.all().filter(user=user).filter(uuid=uuid).delete()
 
-def clear_ports():
+def clear_ports(user, slug):
+    port_info.objects.all().filter(user=user).filter(scan_id=slug).delete()
+
+def clear_all_ports():
     port_info.objects.all().delete()
 
-def select_slug(slug, uid):
-    my_scan = scan.objects.filter(user=uid).filter(slug=slug)
+def clear_all_scans():
+    scan.objects.all().delete()
+
+def select_slug(uuid, user):
+    my_scan = scan.objects.filter(user=user).filter(uuid=uuid)
     return(my_scan)
 
 def num_cves(user):
@@ -106,8 +113,8 @@ def get_cve(slug, cve, user):
     cve = port_info.objects.filter(user=user).filter(scan_id = slug).filter(cve=cve)
     return cve
 
-def convert_scan_to_model(file):
-    task = read_scan.delay(f'/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/{file}')
+def convert_scan_to_model(file, slug):
+    task = read_scan.delay(f'/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/{file}', slug)
     return task
 
 
