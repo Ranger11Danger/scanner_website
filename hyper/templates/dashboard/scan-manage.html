@@ -1,0 +1,37 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    
+<h1>Manage Scan</h1>
+<h3>{{ slug }}</h3>
+<div class="row mb-2">
+    <div class="col">
+        <form method="post" action="/scan/{{ slug }}/manage/">
+            {% csrf_token %}
+            {{ rename_form }}
+            <input type="submit" value="Submit" class="btn btn-primary mt-1">
+        </form>
+    </div>
+</div>
+<div class="row mb-auto">
+    <div class="col">
+        <form method="post" action="/scan/{{ slug }}/manage/">
+            {% csrf_token %}
+            <label for="delete">Delete Scan</label><br>
+            <button type="submit" value="Delete" class="btn btn-primary" name="delete" id="delete">Delete</button>
+        </form>
+    </div> 
+</div>
+
+
+{% if new_name %}
+    <h1>New Name = {{ new_name }}</h1>
+{% endif %}
+</div> <!-- container -->
+{% endblock %}
+

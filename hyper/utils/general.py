@@ -106,8 +106,8 @@ def get_cve(slug, cve, user):
     cve = port_info.objects.filter(user=user).filter(scan_id = slug).filter(cve=cve)
     return cve
 
-def convert_scan_to_model():
-    task = read_scan.delay('/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/scan.xml')
+def convert_scan_to_model(file):
+    task = read_scan.delay(f'/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/{file}')
     return task
 
 

@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from requests.auth import HTTPBasicAuth
 import requests
 import json
+from time import sleep
 from bs4 import BeautifulSoup
 from celery import shared_task
 from hyper.dashboard.models import port_info
@@ -66,8 +67,8 @@ def get_xforce_info(stdcode):
     data = requests.get(f'https://api.xforce.ibmcloud.com/vulnerabilities/search/{stdcode}', auth=HTTPBasicAuth(API_KEY, API_PASS))
     return(data)
 
-
-def process_cve(id , scan_port, address):
+@shared_task(bind=True)
+def process_cve(self,id , scan_port, address):
     data = get_xforce_info(id)
     data = json.loads(data.text)
     name = data[0]['title']
@@ -90,8 +91,8 @@ def process_cve(id , scan_port, address):
         pass
 
     return "Done"
-
-def process_edb(id, scan_port, address, cve_text, uniq_list):
+@shared_task(bind=True)
+def process_edb(self, id, scan_port, address, cve_text, uniq_list):
     cve = convert(id.split(":")[-1])
 
     if cve not in cve_text:
@@ -133,14 +134,17 @@ def read_scan(self, scan):
     edb_list = filter_results('exploitdb', scan_result)
     cve_text = [x.id for x in cve_list]
     scan_len = len(cve_list) + len(edb_list)
-
-    for index, cve in enumerate(cve_list):
-        progress_recorder.set_progress(index + 1, scan_len)
-        process_cve(cve.id, cve.port, cve.address)
+    temp = 0
+    for cve in cve_list:
+        progress_recorder.set_progress(temp + 1, scan_len)
+        process_cve.delay(cve.id, cve.port, cve.address)
+        sleep(.5)
+        temp += 1
     uniq_list = cve_text
-    for index, edbid in enumerate(edb_list):
-        progress_recorder.set_progress(len(cve_list)+ index  + 1, scan_len)
-        process_edb(edbid.id, edbid.port, edbid.address, cve_text, uniq_list)
-        
+    for edbid in edb_list:
+        progress_recorder.set_progress(temp+ 1, scan_len)
+        process_edb.delay(edbid.id, edbid.port, edbid.address, cve_text, uniq_list)
+        temp += 1
+        sleep(.5)
     return "Done"
 
