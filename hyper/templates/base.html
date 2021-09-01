@@ -10,7 +10,9 @@
   <meta content="Coderthemes" name="author" />
 
   <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
-
+  
+  <link href="{% static 'css/vendor/dataTables.bootstrap5.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'css/vendor/responsive.bootstrap5.css' %}" rel="stylesheet" type="text/css" />
   {% block extra_css %}
   {% endblock %}
 
@@ -38,9 +40,15 @@
   <!-- bundle -->
   <script src="{% static 'js/vendor.min.js' %}"></script>
   <script src="{% static 'js/app.min.js' %}"></script>
+  
   {% endblock javascript %}
 
   {% block extra_javascript %}{% endblock %}
+  <script src="{% static 'js/vendor/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static 'js/vendor/dataTables.bootstrap5.js' %}"></script>
+  <script src="{% static 'js/vendor/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static 'js/vendor/responsive.bootstrap5.min.js' %}"></script>
+  <script src="{% static 'js/pages/demo.datatable-init.js' %}"></script>
 </body>
 
 </html>

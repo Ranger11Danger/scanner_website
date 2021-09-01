@@ -72,6 +72,8 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    'django_celery_results',
+    "celery_progress",
 ]
 
 LOCAL_APPS = [

@@ -3,6 +3,9 @@ from requests.auth import HTTPBasicAuth
 import requests
 import json
 from bs4 import BeautifulSoup
+from celery import shared_task
+from hyper.dashboard.models import port_info
+from celery_progress.backend import ProgressRecorder
 
 API_KEY = '25fe06fb-0c6b-475a-9963-59767924c909'
 API_PASS = '53692957-ab54-4712-9716-884b10b82e1a'
@@ -31,8 +34,9 @@ def convert(edbid):
     return(result[1].text.strip())
 
 
-scan_result = []
+
 def parseXML(xmlfile):
+    scan_result = []
     tree = ET.parse(xmlfile)
     root = tree.getroot()
     info = root.find("host")
@@ -54,49 +58,89 @@ def parseXML(xmlfile):
                     elif 'id' in key.items()[0]:
                         id = key.text
                 scan_result.append(vulners_result(type, id, is_exploit, cvss, portid, addr))
-            
         except:
             pass
+    return scan_result
 
 def get_xforce_info(stdcode):
     data = requests.get(f'https://api.xforce.ibmcloud.com/vulnerabilities/search/{stdcode}', auth=HTTPBasicAuth(API_KEY, API_PASS))
     return(data)
 
-def read_scan(scan):
-    parseXML(scan)
 
+def process_cve(id , scan_port, address):
+    data = get_xforce_info(id)
+    data = json.loads(data.text)
+    name = data[0]['title']
+    description = data[0]['description']
+    cvss = data[0]['risk_level']
+    solution = data[0]['remedy']
+    try:
+        port = port_info()
+        port.name = name
+        port.cve = id
+        port.port = scan_port
+        port.ip = address
+        port.score = cvss
+        port.description = description
+        port.solution = solution
+        port.scan_id = 'admin-scan-1'
+        port.user = int(1)
+        port.save()
+    except:
+        pass
+
+    return "Done"
+
+def process_edb(id, scan_port, address, cve_text, uniq_list):
+    cve = convert(id.split(":")[-1])
+
+    if cve not in cve_text:
+        if cve.replace(f"{chr(92)}n","").strip().split()[0] == "N/A":
+            return "Done"
+        else:
+            data = get_xforce_info(f'CVE-{cve.replace(f"{chr(92)}n","").strip().split()[0]}')
+            data = json.loads(data.text)
+            id = f'CVE-{cve.replace(f"{chr(92)}n","").strip().split()[0]}'
+            name = data[0]['title']
+            description = data[0]['description']
+            cvss = data[0]['risk_level']
+            solution = data[0]['remedy']
+        if id in uniq_list:
+            pass
+        else:
+            try:
+                uniq_list.append(id)
+                port = port_info()
+                port.name = name
+                port.cve = id
+                port.port = scan_port
+                port.ip = address
+                port.score = cvss
+                port.description = description
+                port.solution = solution
+                port.scan_id = 'admin-scan-1'
+                port.user = int(1)
+                port.save()
+            except:
+                pass
+    return "Done"
+        
+@shared_task(bind=True)
+def read_scan(self, scan):
+    scan_result = parseXML(scan)
+    progress_recorder = ProgressRecorder(self)
     cve_list = filter_results('cve', scan_result)
     edb_list = filter_results('exploitdb', scan_result)
     cve_text = [x.id for x in cve_list]
+    scan_len = len(cve_list) + len(edb_list)
 
-    for cve in cve_list:
-        data = get_xforce_info(cve.id)
-        data = json.loads(data.text)
-        cve.name = data[0]['title']
-        cve.description = data[0]['description']
-        cve.cvss = data[0]['risk_level']
-        cve.solution = data[0]['remedy']
-
-    uniq_list = []
-    for edbid in edb_list:
-        cve = convert(edbid.id.split(":")[-1])
-
-        if cve not in cve_text:
-            if cve.replace(f"{chr(92)}n","").strip().split()[0] == "N/A":
-                continue
-            data = get_xforce_info(f'CVE-{cve.replace(f"{chr(92)}n","").strip().split()[0]}')
-            data = json.loads(data.text)
-            edbid.id = f'CVE-{cve.replace(f"{chr(92)}n","").strip().split()[0]}'
-            edbid.name = data[0]['title']
-            edbid.description = data[0]['description']
-            edbid.cvss = data[0]['risk_level']
-            edbid.solution = data[0]['remedy']
-            if edbid.id in uniq_list:
-                continue
-            else:
-                uniq_list.append(edbid.id)
-                print(edbid)
-            cve_list.append(edbid) 
-
-    return(cve_list)
+    for index, cve in enumerate(cve_list):
+        progress_recorder.set_progress(index + 1, scan_len)
+        process_cve(cve.id, cve.port, cve.address)
+    uniq_list = cve_text
+    for index, edbid in enumerate(edb_list):
+        progress_recorder.set_progress(len(cve_list)+ index  + 1, scan_len)
+        process_edb(edbid.id, edbid.port, edbid.address, cve_text, uniq_list)
+        
+    return "Done"
 

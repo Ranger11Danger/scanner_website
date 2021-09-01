@@ -1,6 +1,7 @@
 import json
 from hyper.dashboard.models import scan, port_info
 from .process_scan import read_scan
+import ipaddress
 class GenericObject(dict):
     """
     A dict subclass that provides access to its members as if they were
@@ -97,16 +98,30 @@ def select_slug(slug, uid):
     my_scan = scan.objects.filter(user=uid).filter(slug=slug)
     return(my_scan)
 
+def num_cves(user):
+    cves = port_info.objects.filter(user=user)
+    return(len(cves))
+
+def get_cve(slug, cve, user):
+    cve = port_info.objects.filter(user=user).filter(scan_id = slug).filter(cve=cve)
+    return cve
+
 def convert_scan_to_model():
-    cve_list = read_scan('/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/scan.xml')
-    for cve in cve_list:
-        port = port_info()
-        port.cve = cve.id
-        port.port = cve.port
-        port.ip = cve.address
-        port.score = cve.cvss
-        port.description = cve.description
-        port.solution = cve.solution
-        port.scan_id = 'admin-scan-1'
-        port.user = int(1)
-        port.save()
+    task = read_scan.delay('/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/scan.xml')
+    return task
+
+
+
+def is_ipv4(string):
+    try:
+        ipaddress.IPv4Network(string)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+def clense_ips(ips):
+    temp = []
+    for x in ips.split():
+        if is_ipv4(x):
+            temp.append(x)
+    return temp

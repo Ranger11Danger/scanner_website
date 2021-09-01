@@ -1,0 +1,95 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+   <div class="row">
+      <div class="col">
+         <div class="page-title-box">
+            <h1 class="page-title">{{ cve.0.name }}</h1>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col">
+         <div class="card">
+            <div class="card-body">
+               <i class='mdi mdi-identifier float-end' style="font-size: 35px;"></i>
+               <h4 class="card-text">
+                  {{ cve.0.cve }}
+               </h4>
+            </div>
+         </div>
+      </div>
+      <div class="col">
+         <div class="card">
+            <div class="card-body">
+               <i class='mdi mdi-laptop-windows float-end' style="font-size: 35px;"></i>
+               <h4 class="card-title">
+                  Address
+               </h4>
+               <p1 class="card-text">
+                  {{ cve.0.ip }}
+               </p1>
+            </div>
+         </div>
+      </div>
+      <div class="col">
+         <div class="card">
+            <div class="card-body">
+               <i class='mdi mdi-serial-port float-end' style="font-size: 35px;"></i>
+               <h4 class="card-text">
+                  Port
+               </h4>
+               <p1 class="card-text">
+                  {{ cve.0.port }}
+               </p1>
+            </div>
+         </div>
+      </div>
+      <div class="col">
+         {% if cve.0.score > 6 %}
+         <div class="card text-white bg-danger">
+         {% elif cve.0.score > 4%}
+         <div class="card text-white bg-warning">
+         {% else %}
+         <div class="card text-white bg-success">
+         {% endif %}
+         
+            <div class="card-body">
+               <i class='mdi mdi-asterisk float-end' style="font-size: 35px;"></i>
+               <h4 class="card-text">
+                  Score: {{ cve.0.score }}
+               </h4>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col">
+         <div class="card h-100">
+            <div class="card-body">
+               <h3 class="card-title">Description</h3>
+               <hr/>
+               <p1 class="card-text">{{ cve.0.description }}</p1>
+            </div>
+         </div>
+      </div>
+      <div class="col">
+         <div class="card h-100">
+            <div class="card-body">
+               <h3 class="card-title">Solution</h3>
+               <hr/>
+               <p1 class="card-text">{{ cve.0.solution }}</p1>
+            </div>
+            
+         </div>
+         
+      </div>
+   </div>   
+</div> <!-- container -->
+{% endblock %}
+

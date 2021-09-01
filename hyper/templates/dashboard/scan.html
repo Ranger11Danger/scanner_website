@@ -1,0 +1,28 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    <h1> New Scan</h1>
+    <div class="row">
+        <div class="col-2">
+            <form actiopn="/scan" method="post">
+                <div class="form-group">
+                    {% csrf_token %}
+                    {{ scan_form }}
+                </div>
+                <input type="submit" value="Submit" class="btn btn-primary">
+            </form>
+        </div>
+    </div>
+   
+    {% if address %}
+        <h1>Name: {{ name }}</h1>
+        <h1>Address: {{ address }}</h1>
+    {% endif %}
+</div> <!-- container -->
+{% endblock %}
+

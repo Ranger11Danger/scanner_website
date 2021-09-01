@@ -1,12 +1,11 @@
-import json
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import TemplateView
-import sqlite3
-
-from hyper.utils.general import list_scans, add_scan,select_scans,clear_scans,select_slug,get_db_data,convert_scan_to_model,clear_ports
-
+from .forms import ScanForm
+import time
+from hyper.utils.general import list_scans, add_scan,select_scans,clear_scans,select_slug,get_db_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips
+from .tasks import go_to_sleep
 
 
 User = get_user_model()
@@ -20,8 +19,10 @@ class DashboardMainView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         scans = select_scans(self.request.user.id)
+        context['cve_nums'] = num_cves(self.request.user.id)
         context['scans'] = scans
         context['scan_num'] = len(scans)
+        context['task_id'] = convert_scan_to_model()
         return context
 
 
@@ -36,6 +37,42 @@ class ScanDetailsView(LoginRequiredMixin, TemplateView):
             context['data'] = get_db_data(self.kwargs['slug'], self.request.user.id)
         return context
 
+class CveDetailsView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/cve_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        scan_id = self.kwargs['slug']
+        cve_id = self.kwargs['cveid']
+        context['cve'] = get_cve(scan_id,cve_id,self.request.user.id)
+        return context
+
+class ScanView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/scan.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['scan_form'] = ScanForm()
+        return context
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = ScanForm(request.POST)
+        if form.is_valid():
+            context['name'] = form.cleaned_data['name']
+            context['address'] = clense_ips(form.cleaned_data['address'])
+
+        
+        return self.render_to_response(context)
+
+class CeleryTest(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/celery-test.html'
+    def get_context_data(self, **kwargs):
+        go_to_sleep.delay(5)
+        return super().get_context_data(**kwargs)
+            
+
+
+dashboard_celery_view = CeleryTest.as_view()
+dashboard_scan_view = ScanView.as_view()
+dashboard_cve_details = CveDetailsView.as_view()
 dashboard_main_view = DashboardMainView.as_view()
 dashboard_scan_details = ScanDetailsView.as_view()
 

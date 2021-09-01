@@ -8,15 +8,40 @@
 <div class="container-fluid">
     {% if scan %}
         <h1>{{ scan.0.name }}</h1>
-        <ul>
-            {% for x in data %}
-            <li>{{ x.cve }}</li>
-            {% endfor %}
-        </ul>
+        <table id="basic-datatable" class="table dt-responsive nowrap w-100">
+            <thead>
+                <tr>
+                    <th>CVE</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Port</th>
+                    <th>Score</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for x in data %}
+                    <tr>
+                        <td>{{ x.cve }}</td>
+                        <td>{{ x.name }}</td>
+                        <td>{{ x.ip }}</td>
+                        <td>{{ x.port }}</td>
+                        <td>{{ x.score }}</td>
+                        <td><a href="{{ x.cve }}" type="button" class="btn btn-primary btn-rounded">Details</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
         
     {% else %}
         <h1>Scan Not Found...</h1>
     {% endif %}
-</div> <!-- container -->
+</div> 
+
+<script>
+    $('#basic-datatable').DataTable();
+</script>
+
+<!-- container -->
 {% endblock %}
 
