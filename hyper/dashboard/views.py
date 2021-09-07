@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import TemplateView
 from .forms import ScanForm, RenameScanForm
-from hyper.utils.general import list_scans, clear_all_scans,add_scan,select_scans,clear_scans,select_slug,get_scan_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips,clear_all_ports
+from hyper.utils.general import get_ips, get_address_cve, get_address_data,list_scans, clear_all_scans,add_scan,select_scans,clear_scans,select_slug,get_scan_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips,clear_all_ports
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
 
@@ -86,9 +86,40 @@ class ScanManageView(LoginRequiredMixin, TemplateView):
         return self.render_to_response(context)
 
 
+class AddressDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address_dashboard.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ip_list = get_ips(user=self.request.user.id)
+        context['ip_list'] = []
+        for ip in ip_list:
+            context['ip_list'].append([ip, ip.replace('.', '-')])
+        return context
+
+
+class AddressDetailsView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs['slug'].replace('-', '.')
+        context['data'] = get_address_data(self.request.user.id, slug)
+        return context
+
+
+class AddressCveDetailsView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/cve_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        address = self.kwargs['slug'].replace('-', '.')
+        cve_id = self.kwargs['cveid']
+        context['cve'] = get_address_cve(address, self.request.user.id, cve_id)
+        return context
+
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
 dashboard_cve_details = CveDetailsView.as_view()
 dashboard_main_view = DashboardMainView.as_view()
 dashboard_scan_details = ScanDetailsView.as_view()
-
+dashboard_address_view = AddressDashboardView.as_view()
+address_details_view = AddressDetailsView.as_view()
+address_cve_details_view = AddressCveDetailsView.as_view()

@@ -133,3 +133,15 @@ def clense_ips(ips):
         if is_ipv4(x):
             temp.append(x)
     return temp
+
+def get_ips(user):
+    ip_list = [ip['ip'] for ip in port_info.objects.filter(user=user).values('ip').distinct()]
+    return ip_list
+
+def get_address_data(user, address):
+    data = port_info.objects.filter(user=user, ip=address)
+    return data
+
+def get_address_cve(address, user, cve):
+    cve = port_info.objects.filter(user=user).filter(ip = address).filter(cve=cve)
+    return cve
