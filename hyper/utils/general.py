@@ -1,5 +1,5 @@
 import json
-from hyper.dashboard.models import scan, port_info
+from hyper.dashboard.models import scan, port_info, asset_group, asset
 from .process_scan import read_scan
 import ipaddress
 class GenericObject(dict):
@@ -145,3 +145,11 @@ def get_address_data(user, address):
 def get_address_cve(address, user, cve):
     cve = port_info.objects.filter(user=user).filter(ip = address).filter(cve=cve)
     return cve
+
+def get_asset_groups(user):
+    groups = asset_group.objects.filter(user=user)
+    return groups
+
+def get_assets(user, group):
+    asset_list  = [asset['address'] for asset in asset.objects.filter(user=user, group=group).values('address').distinct()]
+    return asset_list

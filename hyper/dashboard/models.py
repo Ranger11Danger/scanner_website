@@ -20,3 +20,13 @@ class port_info(models.Model):
     solution = models.TextField()
     scan_id = models.SlugField()
     user = models.IntegerField()
+
+class asset_group(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    name = models.TextField()
+    user = models.IntegerField()
+
+class asset(models.Model):
+    address = models.TextField()
+    group = models.ForeignKey(asset_group, on_delete=models.CASCADE)
+    user = models.IntegerField()
