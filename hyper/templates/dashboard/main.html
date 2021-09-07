@@ -42,12 +42,23 @@
 
     <!-- end page title --> 
     <table class='table'>
-        {% for scan in scans %}
-        <tr>
-            <td><h1>{{ scan.name }}</h1></td>
-            <td><a class="btn btn-primary" href="/dashboard/scan/{{ scan.slug }}">Details</a></td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Time Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scan in scans %}
+            <tr>
+                <td><h1>{{ scan.name }}</h1></td>
+                <td>{{ scan.address }}</td>
+                <td>{{ scan.created_at }}</td>
+                <td><a class="btn btn-primary" href="/dashboard/scan/{{ scan.slug }}">Details</a></td>
+            </tr>
+            {% endfor %}
+        </tbody> 
     </table>
     
 

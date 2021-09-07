@@ -81,11 +81,12 @@ def list_scans():
     scans = scan.objects.all()
     return(scans)
 
-def add_scan(user, name):
+def add_scan(user, name, address):
     new_scan = scan()
     new_scan.user = user
     new_scan.name = name
     new_scan.slug = f"scan-{new_scan.uuid}"
+    new_scan.address = address
     new_scan.save()
     return new_scan.slug
 

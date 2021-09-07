@@ -56,7 +56,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
             context['name'] = form.cleaned_data['name']
             context['address'] = clense_ips(form.cleaned_data['address'])
             context['scan_name'] = form.cleaned_data['scan_name']
-            slug = add_scan(request.user.id, form.cleaned_data['scan_name'])
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],", ".join(clense_ips(form.cleaned_data['address'])))
             context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             
 
@@ -84,6 +84,7 @@ class ScanManageView(LoginRequiredMixin, TemplateView):
             clear_scans(request.user.id, self.kwargs['slug'][5:])
             return redirect('/')
         return self.render_to_response(context)
+
 
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()

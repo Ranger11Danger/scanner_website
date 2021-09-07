@@ -1,5 +1,5 @@
-from django.db import models
 import uuid
+from django.db import models
 # Create your models here.
 
 class scan(models.Model):
@@ -7,6 +7,8 @@ class scan(models.Model):
     name = models.TextField()
     user = models.IntegerField()
     slug = models.SlugField()
+    address = models.TextField()
+    created_at  = models.DateTimeField(auto_now_add=True)
 
 class port_info(models.Model):
     cve = models.TextField()
