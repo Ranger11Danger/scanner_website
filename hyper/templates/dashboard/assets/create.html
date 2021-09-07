@@ -41,33 +41,16 @@
     </div>
 
     <!-- end page title --> 
-    <table class='table'>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Members</th>
-                <th>Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for group in data %}
-            <tr>
-                <td><h1>{{ group.0.name }}</h1></td>
-                <td>
-                    <ul>
-                        {% for member in group.1 %}
-                            <li>{{ member }}</li>
-                        {% endfor %}
-                    </ul>
-                </td>
-                <td><a class="btn btn-primary" href="/assets/{{ group.0.uuid }}">Details</a></td>
-            </tr>
-            {% endfor %}
-        </tbody> 
-    </table>
-    
-
-    
+    <h1>Create a Asset Group</h1>
+    <div>
+        <div>
+            <form action="/assets/create" method="post">
+                {% csrf_token %}
+                {{ create_form }}
+                <input type="submit" value="Submit" class="btn btn-primary mt-1">
+            </form>
+        </div>
+    </div>
 </div> <!-- container -->
 {% endblock %}
 

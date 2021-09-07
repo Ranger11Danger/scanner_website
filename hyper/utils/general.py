@@ -115,7 +115,7 @@ def get_cve(slug, cve, user):
     return cve
 
 def convert_scan_to_model(file, slug):
-    task = read_scan.delay(f'/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/{file}', slug)
+    task = read_scan.delay(f'/workspaces/scanner_website/hyper/scans/{file}', slug)
     return task
 
 
@@ -153,3 +153,15 @@ def get_asset_groups(user):
 def get_assets(user, group):
     asset_list  = [asset['address'] for asset in asset.objects.filter(user=user, group=group).values('address').distinct()]
     return asset_list
+
+def create_asset_group(user, name):
+    group = asset_group(user=user, name=name)
+    group.save()
+
+def change_group_name(gid, name):
+    asset_group.objects.filter(id = gid).update(name = name)
+
+def add_asset_to_group(ip, user, group):
+    group_obj = asset_group.objects.filter(id=group)
+    new_asset = asset(address=ip, user=user, group=group_obj[0])
+    new_asset.save()
