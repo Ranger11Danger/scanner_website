@@ -7,39 +7,17 @@
 <!-- Start Content-->
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12">
+        <div class="col-6">
             <div class="page-title-box">
                 <div class="page-title-right"></div>
                 <h1 class="page-title">Asset Groups</h4>
             </div>
         </div>
-    </div>
-    <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="row row-cols-1 row-cols-md-2 g-2">
-                <div class="col">
-                    <div class="card titlebox-one">
-                        <div class="card-body">
-                            <i class='mdi mdi-bug-outline float-end' style="font-size: 35px;"></i>
-                            <h4 class="card-title text-uppercase">CVE's Found</h4>
-                            <h3>{{ cve_nums }}</h3>
-                        </div> <!-- end card-body-->
-                    </div>
-                 </div>
-                <div class="col">
-                    <div class="card titlebox-one">
-                        <div class="card-body">
-                            <i class='mdi mdi-laptop-windows float-end' style="font-size: 35px;"></i>
-                            <h4 class="text-uppercase card-title"> IP's Scanned</h4>
-                            <h3>{{ scan_num }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-6 mt-2">
+            <a href="/assets/create" class="float-end"><button class="btn btn-primary btn-rounded">New Asset Group</button></a>
         </div>
     </div>
-
+    <!-- start page title -->
     <!-- end page title --> 
     <table class='table'>
         <thead>
@@ -60,7 +38,7 @@
                         {% endfor %}
                     </ul>
                 </td>
-                <td><a class="btn btn-primary" href="/assets/{{ group.0.uuid }}">Details</a>
+                <td><a class="btn btn-primary" href="/assets/{{ group.0.id }}">Details</a>
                     <a class="btn btn-primary pl-3" href="/assets/manage/{{ group.0.id }}">manage</a>
                 </td>
             </tr>

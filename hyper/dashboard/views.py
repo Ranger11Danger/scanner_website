@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import TemplateView
-from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm
+from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm
 from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
@@ -141,22 +141,44 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['change_name_form'] = CreateAssetGroup()
         context['add_asset_form'] = AddAssetForm(self.request.user.id)
+        context['del_asset_form'] = DeleteAssetForm(self.request.user.id, self.kwargs['groupid'])
         context['gid'] = self.kwargs['groupid']
         return context
     def post(self, request, **kwargs):
+        print(request.POST.get('delete'))
         context = self.get_context_data(**kwargs)
-        form = CreateAssetGroup(request.POST)
-        if form.is_valid():
-            groupid = self.kwargs['groupid']
-            change_group_name(groupid, form.cleaned_data['name'])
-            return redirect("/assets/")
-        form = AddAssetForm(request.user.id,request.POST)
-        if form.is_valid():
-            add_asset_to_group(form.cleaned_data['addresses'], request.user.id, self.kwargs['groupid'])
-            return redirect("/assets/")
+        if request.POST.get('change_name'):
+            form = CreateAssetGroup(request.POST)
+            if form.is_valid():
+                groupid = self.kwargs['groupid']
+                change_group_name(groupid, form.cleaned_data['name'])
+                return redirect("/assets/")
+        if request.POST.get('add'):
+            form = AddAssetForm(request.user.id, request.POST)
+            if form.is_valid():
+                for x in form.cleaned_data['addresses']:
+                    if x != "None":
+                        add_asset_to_group(x, request.user.id, self.kwargs['groupid'])
+                return redirect("/assets/")
+        if request.POST.get('delete') == "Submit":
+            form = DeleteAssetForm(request.user.id, self.kwargs['groupid'], request.POST)
+            if form.is_valid():
+                for x in form.cleaned_data['addresses']:
+                    if x != "None":
+                        del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
+                return redirect("/assets/")
         return self.render_to_response(context)
         
+class AssetGroupAddressView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address/address_dashboard.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
+        ip_list = get_assets(self.request.user.id, self.kwargs['groupid'])
+        context['ip_list'] = []
+        for ip in ip_list:
+            context['ip_list'].append([ip, ip.replace('.', '-')])
+        return context
 
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
@@ -169,3 +191,4 @@ address_cve_details_view = AddressCveDetailsView.as_view()
 asset_group_view = AssetGroupDashboardView.as_view()
 asset_group_create_view = CreateAssetGroupView.as_view()
 asset_group_manage_view = ManageAssetGroupView.as_view()
+asset_group_address_view = AssetGroupAddressView.as_view()

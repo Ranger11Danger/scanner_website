@@ -21,20 +21,27 @@
         <form action="/assets/manage/{{ gid }}/" method="POST">
         {% csrf_token %}
         {{ change_name_form }}
-        <input type="submit" value="Submit" class="btn btn-primary mt-1">
+        <input type="submit" value="Submit" class="btn btn-primary mt-1" name='change_name'>
         </form>
         <h2>Add Address to Group</h2>
         <form action="/assets/manage/{{ gid }}/" method="POST">
             {% csrf_token %}
             {{ add_asset_form }}
             
-            <input type="submit" value="Submit" class="btn btn-primary mt-1">
+            <input type="Submit" name = 'add' value="Submit" class="btn btn-primary mt-1">
+        </form>
+        <h2>Remove Address from Group</h2>
+        <form action="/assets/manage/{{ gid }}/" method="POST">
+            {% csrf_token %}
+            {{ del_asset_form }}
+            <input type="Submit" class="btn btn-primary" name="delete" id="del">
         </form>
     </div>
 </div> <!-- container -->
 
-{% if address %}
-    <h1>{{ address }}</h1>
-{% endif %}
+<script>
+    document.getElementById("del_asset").selectedIndex = -1;
+    document.getElementById("add_asset").selectedIndex = -1;
+</script>
 {% endblock %}
 

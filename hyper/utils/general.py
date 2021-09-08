@@ -165,3 +165,6 @@ def add_asset_to_group(ip, user, group):
     group_obj = asset_group.objects.filter(id=group)
     new_asset = asset(address=ip, user=user, group=group_obj[0])
     new_asset.save()
+
+def del_asset_from_group(user, gid, address):
+    asset.objects.filter(user=user, group = gid, address=address).delete()
