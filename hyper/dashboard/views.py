@@ -186,9 +186,11 @@ class DashboardInfoView(LoginRequiredMixin, TemplateView):
         ips = get_ips(self.request.user.id)
         context['ip_num'] = len(ips)
         context['cve_nums'] = len(num_cves(self.request.user.id))
-        context['critical_num'] = len(num_cves(self.request.user.id).filter(score__gte=8))
-        context['moderate_num'] = len(num_cves(self.request.user.id).filter(score__gte=5).filter(score__lte=7))
+        context['critical_num'] = len(num_cves(self.request.user.id).filter(score__gte=9))
+        context['high_num'] = len(num_cves(self.request.user.id).filter(score__gte=7).filter(score__lt=9))
+        context['medium_num'] = len(num_cves(self.request.user.id).filter(score__gte=4).filter(score__lt=7))
         context['top_ten'] = get_top_ten(self.request.user.id)
+        context['data'] = num_cves(self.request.user.id)
         return context
 
 class DashboardScoreView(LoginRequiredMixin, TemplateView):
@@ -199,10 +201,13 @@ class DashboardScoreView(LoginRequiredMixin, TemplateView):
         level = self.kwargs['score']
         if level == 'critical':
             context['level'] = 'Critical Level Vulnerabilities'
-            context['data'] = num_cves(self.request.user.id).filter(score__gte=8)
+            context['data'] = num_cves(self.request.user.id).filter(score__gte=9)
+        elif level == 'high':
+            context['level'] = 'High Level Vulnerabilities'
+            context['data'] = num_cves(self.request.user.id).filter(score__gte=7).filter(score__lt=9)
         elif level == 'medium':
-            context['level'] = 'Medium Level Vulnerabilities'
-            context['data'] = num_cves(self.request.user.id).filter(score__gte=5).filter(score__lte=7)
+            context['level'] = 'Mediu Level Vulnerabilities'
+            context['data'] = num_cves(self.request.user.id).filter(score__gte=4).filter(score__lt=7)
         return context
 
 dashboard_info_view = DashboardInfoView.as_view()

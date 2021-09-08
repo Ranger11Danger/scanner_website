@@ -173,5 +173,18 @@ def get_top_ten(user):
     ip_list = get_ips(user)
     ip_stats = {}
     for ip in ip_list[:10]:
-        ip_stats[ip] = len(get_address_data(user, ip))
+        score = 0
+        vulns = get_address_data(user, ip)
+        for vuln in vulns:
+            if vuln.score >= 9:
+                score += 3
+            elif vuln.score >= 7 and vuln.score < 9:
+                score += 2
+            elif vuln.score >= 4 and vuln.score < 7:
+                score += 1
+            elif vuln.score < 4:
+                score += .5
+        ip_stats[ip] = score
+    
+    
     return sorted(ip_stats.items(), key=lambda x:x[1], reverse=True)

@@ -16,18 +16,19 @@
     </div>
     <!-- start page title -->
     <!-- end page title --> 
-    <table class='table'>
+    <table id="basic-datatable" class="table dt-responsive nowrap w-100">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Address</th>
                 <th>Time Created</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
             {% for scan in scans %}
             <tr>
-                <td><h1>{{ scan.name }}</h1></td>
+                <td><h5>{{ scan.name }}</h5></td>
                 <td>{{ scan.address }}</td>
                 <td>{{ scan.created_at }}</td>
                 <td><a class="btn btn-primary" href="/dashboard/scan/{{ scan.slug }}">Details</a></td>
@@ -39,5 +40,8 @@
 
     
 </div> <!-- container -->
+<script>
+    $('#basic-datatable').DataTable();
+</script>
 {% endblock %}
 

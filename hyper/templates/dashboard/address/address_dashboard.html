@@ -16,7 +16,7 @@
     </div>
     <!-- start page title -->
     <!-- end page title --> 
-    <table class='table'>
+    <table id="basic-datatable" class="table dt-responsive nowrap w-100">
         <thead>
             <tr>
                 <th>Address</th>
@@ -36,5 +36,8 @@
 
     
 </div> <!-- container -->
+<script>
+    $('#basic-datatable').DataTable();
+</script>
 {% endblock %}
 
