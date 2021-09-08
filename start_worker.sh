@@ -1,0 +1,1 @@
+celery -A hyper.dashboard worker -l info

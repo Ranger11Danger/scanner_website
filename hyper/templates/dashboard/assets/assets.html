@@ -1,0 +1,53 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <div class="page-title-box">
+                <div class="page-title-right"></div>
+                <h1 class="page-title">Asset Groups</h4>
+            </div>
+        </div>
+        <div class="col-6 mt-2">
+            <a href="/assets/create" class="float-end"><button class="btn btn-primary btn-rounded">New Asset Group</button></a>
+        </div>
+    </div>
+    <!-- start page title -->
+    <!-- end page title --> 
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Members</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in data %}
+            <tr>
+                <td><h1>{{ group.0.name }}</h1></td>
+                <td>
+                    <ul>
+                        {% for member in group.1 %}
+                            <li>{{ member }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td><a class="btn btn-primary" href="/assets/{{ group.0.id }}">Details</a>
+                    <a class="btn btn-primary pl-3" href="/assets/manage/{{ group.0.id }}">manage</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody> 
+    </table>
+    
+
+    
+</div> <!-- container -->
+{% endblock %}
+

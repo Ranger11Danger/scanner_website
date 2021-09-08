@@ -1,5 +1,5 @@
 import json
-from hyper.dashboard.models import scan, port_info
+from hyper.dashboard.models import scan, port_info, asset_group, asset
 from .process_scan import read_scan
 import ipaddress
 class GenericObject(dict):
@@ -81,11 +81,12 @@ def list_scans():
     scans = scan.objects.all()
     return(scans)
 
-def add_scan(user, name):
+def add_scan(user, name, address):
     new_scan = scan()
     new_scan.user = user
     new_scan.name = name
     new_scan.slug = f"scan-{new_scan.uuid}"
+    new_scan.address = address
     new_scan.save()
     return new_scan.slug
 
@@ -114,7 +115,7 @@ def get_cve(slug, cve, user):
     return cve
 
 def convert_scan_to_model(file, slug):
-    task = read_scan.delay(f'/home/joshua/Documents/fiverr/giuseppecompare_website/scanner_website/hyper/scans/{file}', slug)
+    task = read_scan.delay(f'/workspaces/scanner_website/hyper/scans/{file}', slug)
     return task
 
 
@@ -132,3 +133,38 @@ def clense_ips(ips):
         if is_ipv4(x):
             temp.append(x)
     return temp
+
+def get_ips(user):
+    ip_list = [ip['ip'] for ip in port_info.objects.filter(user=user).values('ip').distinct()]
+    return ip_list
+
+def get_address_data(user, address):
+    data = port_info.objects.filter(user=user, ip=address)
+    return data
+
+def get_address_cve(address, user, cve):
+    cve = port_info.objects.filter(user=user).filter(ip = address).filter(cve=cve)
+    return cve
+
+def get_asset_groups(user):
+    groups = asset_group.objects.filter(user=user)
+    return groups
+
+def get_assets(user, group):
+    asset_list  = [asset['address'] for asset in asset.objects.filter(user=user, group=group).values('address').distinct()]
+    return asset_list
+
+def create_asset_group(user, name):
+    group = asset_group(user=user, name=name)
+    group.save()
+
+def change_group_name(gid, name):
+    asset_group.objects.filter(id = gid).update(name = name)
+
+def add_asset_to_group(ip, user, group):
+    group_obj = asset_group.objects.filter(id=group)
+    new_asset = asset(address=ip, user=user, group=group_obj[0])
+    new_asset.save()
+
+def del_asset_from_group(user, gid, address):
+    asset.objects.filter(user=user, group = gid, address=address).delete()

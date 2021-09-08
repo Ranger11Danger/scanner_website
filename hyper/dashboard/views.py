@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import TemplateView
-from .forms import ScanForm, RenameScanForm
-from hyper.utils.general import list_scans, clear_all_scans,add_scan,select_scans,clear_scans,select_slug,get_scan_data,convert_scan_to_model,clear_ports,num_cves,get_cve,clense_ips,clear_all_ports
+from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm
+from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
 
@@ -25,7 +25,7 @@ class DashboardMainView(LoginRequiredMixin, TemplateView):
 
 
 class ScanDetailsView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/scan_details.html"
+    template_name = "dashboard/scan/scan_details.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
@@ -35,7 +35,7 @@ class ScanDetailsView(LoginRequiredMixin, TemplateView):
             context['data'] = get_scan_data(self.kwargs['slug'][5:], self.request.user.id)
         return context   
 class CveDetailsView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/cve_details.html"
+    template_name = "dashboard/scan/cve_details.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         scan_id = self.kwargs['slug']
@@ -44,7 +44,7 @@ class CveDetailsView(LoginRequiredMixin, TemplateView):
         return context
 
 class ScanView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/scan.html"
+    template_name = "dashboard/scan/scan.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['scan_form'] = ScanForm()
@@ -56,14 +56,14 @@ class ScanView(LoginRequiredMixin, TemplateView):
             context['name'] = form.cleaned_data['name']
             context['address'] = clense_ips(form.cleaned_data['address'])
             context['scan_name'] = form.cleaned_data['scan_name']
-            slug = add_scan(request.user.id, form.cleaned_data['scan_name'])
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],", ".join(clense_ips(form.cleaned_data['address'])))
             context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             
 
         return self.render_to_response(context)
 
 class ScanManageView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/scan-manage.html"
+    template_name = "dashboard/scan/scan_manage.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['slug'] = self.kwargs['slug']
@@ -85,9 +85,110 @@ class ScanManageView(LoginRequiredMixin, TemplateView):
             return redirect('/')
         return self.render_to_response(context)
 
+
+class AddressDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address/address_dashboard.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ip_list = get_ips(user=self.request.user.id)
+        context['ip_list'] = []
+        for ip in ip_list:
+            context['ip_list'].append([ip, ip.replace('.', '-')])
+        return context
+class AddressDetailsView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address/address_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slug = self.kwargs['slug'].replace('-', '.')
+        context['data'] = get_address_data(self.request.user.id, slug)
+        return context
+class AddressCveDetailsView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/scan/cve_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        address = self.kwargs['slug'].replace('-', '.')
+        cve_id = self.kwargs['cveid']
+        context['cve'] = get_address_cve(address, self.request.user.id, cve_id)
+        return context
+class AssetGroupDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/assets/assets.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['data'] = []
+        groups = get_asset_groups(user=self.request.user.id)
+        for group in groups:
+            context['data'].append([group, get_assets(self.request.user.id, group)])
+        return context
+
+
+class CreateAssetGroupView(LoginRequiredMixin, TemplateView):
+    template_name ="dashboard/assets/create.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['create_form'] = CreateAssetGroup()
+        return context
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = CreateAssetGroup(request.POST)
+        if form.is_valid():
+            create_asset_group(request.user.id, form.cleaned_data['name'])
+            return redirect('/assets/')
+        return self.render_to_response(context)
+
+class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/assets/manage.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_name_form'] = CreateAssetGroup()
+        context['add_asset_form'] = AddAssetForm(self.request.user.id)
+        context['del_asset_form'] = DeleteAssetForm(self.request.user.id, self.kwargs['groupid'])
+        context['gid'] = self.kwargs['groupid']
+        return context
+    def post(self, request, **kwargs):
+        print(request.POST.get('delete'))
+        context = self.get_context_data(**kwargs)
+        if request.POST.get('change_name'):
+            form = CreateAssetGroup(request.POST)
+            if form.is_valid():
+                groupid = self.kwargs['groupid']
+                change_group_name(groupid, form.cleaned_data['name'])
+                return redirect("/assets/")
+        if request.POST.get('add'):
+            form = AddAssetForm(request.user.id, request.POST)
+            if form.is_valid():
+                for x in form.cleaned_data['addresses']:
+                    if x != "None":
+                        add_asset_to_group(x, request.user.id, self.kwargs['groupid'])
+                return redirect("/assets/")
+        if request.POST.get('delete') == "Submit":
+            form = DeleteAssetForm(request.user.id, self.kwargs['groupid'], request.POST)
+            if form.is_valid():
+                for x in form.cleaned_data['addresses']:
+                    if x != "None":
+                        del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
+                return redirect("/assets/")
+        return self.render_to_response(context)
+        
+class AssetGroupAddressView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/address/address_dashboard.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        ip_list = get_assets(self.request.user.id, self.kwargs['groupid'])
+        context['ip_list'] = []
+        for ip in ip_list:
+            context['ip_list'].append([ip, ip.replace('.', '-')])
+        return context
+
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
 dashboard_cve_details = CveDetailsView.as_view()
 dashboard_main_view = DashboardMainView.as_view()
 dashboard_scan_details = ScanDetailsView.as_view()
-
+dashboard_address_view = AddressDashboardView.as_view()
+address_details_view = AddressDetailsView.as_view()
+address_cve_details_view = AddressCveDetailsView.as_view()
+asset_group_view = AssetGroupDashboardView.as_view()
+asset_group_create_view = CreateAssetGroupView.as_view()
+asset_group_manage_view = ManageAssetGroupView.as_view()
+asset_group_address_view = AssetGroupAddressView.as_view()

@@ -1,0 +1,33 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right"></div>
+                <h1 class="page-title">Asset Groups</h4>
+            </div>
+        </div>
+    </div>
+    <!-- start page title -->
+    
+
+    <!-- end page title --> 
+    <h1>Create a Asset Group</h1>
+    <div>
+        <div>
+            <form action="/assets/create" method="post">
+                {% csrf_token %}
+                {{ create_form }}
+                <input type="submit" value="Submit" class="btn btn-primary mt-1">
+            </form>
+        </div>
+    </div>
+</div> <!-- container -->
+{% endblock %}
+
