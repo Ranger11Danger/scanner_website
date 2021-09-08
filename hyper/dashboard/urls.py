@@ -12,12 +12,16 @@ from .views import (dashboard_main_view,
                     asset_group_view,
                     asset_group_create_view,
                     asset_group_manage_view,
-                    asset_group_address_view
+                    asset_group_address_view,
+                    dashboard_info_view,
+                    dashboard_score_view
                     )
 
 app_name = "dashboard"
 urlpatterns = [
-    path("", view=dashboard_main_view, name="index"),
+    path("dashboard/level/<slug:score>/", view=dashboard_score_view, name="dashboard score"),
+    path("dashboard/scans", view=dashboard_main_view, name="index"),
+    path("", view=dashboard_info_view, name="info"),
     path("addresses", view=dashboard_address_view, name="address view"),
     path('addresses/<slug:slug>/', view=address_details_view, name="address details"),
     path('addresses/<slug:slug>/<slug:cveid>/', view=address_cve_details_view, name="address cve details"),

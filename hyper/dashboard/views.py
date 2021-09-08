@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.checks.messages import Critical
 from django.urls import reverse
 from django.views.generic import TemplateView
 from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm
@@ -18,9 +19,7 @@ class DashboardMainView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         scans = select_scans(self.request.user.id)
-        context['cve_nums'] = num_cves(self.request.user.id)
         context['scans'] = scans
-        context['scan_num'] = len(scans)
         return context
 
 
@@ -180,6 +179,33 @@ class AssetGroupAddressView(LoginRequiredMixin, TemplateView):
             context['ip_list'].append([ip, ip.replace('.', '-')])
         return context
 
+class DashboardInfoView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/info.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ips = get_ips(self.request.user.id)
+        context['ip_num'] = len(ips)
+        context['cve_nums'] = len(num_cves(self.request.user.id))
+        context['critical_num'] = len(num_cves(self.request.user.id).filter(score__gte=8))
+        context['moderate_num'] = len(num_cves(self.request.user.id).filter(score__gte=5).filter(score__lte=7))
+        context['top_ten'] = get_top_ten(self.request.user.id)
+        return context
+
+class DashboardScoreView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/scan/scan_details.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['scan'] = 1
+        level = self.kwargs['score']
+        if level == 'critical':
+            context['level'] = 'Critical Level Vulnerabilities'
+            context['data'] = num_cves(self.request.user.id).filter(score__gte=8)
+        elif level == 'medium':
+            context['level'] = 'Medium Level Vulnerabilities'
+            context['data'] = num_cves(self.request.user.id).filter(score__gte=5).filter(score__lte=7)
+        return context
+
+dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
 dashboard_cve_details = CveDetailsView.as_view()
@@ -192,3 +218,4 @@ asset_group_view = AssetGroupDashboardView.as_view()
 asset_group_create_view = CreateAssetGroupView.as_view()
 asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
+dashboard_score_view = DashboardScoreView.as_view()

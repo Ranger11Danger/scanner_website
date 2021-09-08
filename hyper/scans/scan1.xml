@@ -35,12 +35,6 @@
 </table>
 <table>
 <elem key="is_exploit">true</elem>
-<elem key="type">exploitdb</elem>
-<elem key="cvss">7.8</elem>
-<elem key="id">EDB-ID:40888</elem>
-</table>
-<table>
-<elem key="is_exploit">true</elem>
 <elem key="type">metasploit</elem>
 <elem key="cvss">7.5</elem>
 <elem key="id">MSF:ILITIES/OPENBSD-OPENSSH-CVE-2010-4478/</elem>

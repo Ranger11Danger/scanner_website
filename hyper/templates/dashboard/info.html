@@ -1,0 +1,118 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right"></div>
+                <h1 class="page-title">Scan Results</h4>
+            </div>
+        </div>
+    </div>
+    <!-- start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="row row-cols-1 row-cols-md-2 g-2">
+                <div class="col">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card titlebox-one">
+                                <div class="card-body">
+                                    <i class='mdi mdi-bug-outline float-end' style="font-size: 35px;"></i>
+                                    <h4 class="card-title text-uppercase">CVE's Found</h4>
+                                    <h3>{{ cve_nums }}</h3>
+                                </div> <!-- end card-body-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card titlebox-one bg-danger text-white">
+                                <div class="card-body">
+                                    <i class='mdi mdi-fire-alert float-end' style="font-size: 35px;"></i>
+                                    <h4 class="card-title text-uppercase">Critical Vulnerabilities</h4>
+                                    <div class="row">
+                                        <div class="col-1">
+                                            <h3>{{ critical_num }}</h3>
+                                        </div>
+                                        <div class="col">
+                                            <a class="btn btn-light" href="/dashboard/level/critical/">View</a>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card titlebox-one bg-warning text-white">
+                                <div class="card-body">
+                                    <i class='mdi mdi-exclamation-thick float-end' style="font-size: 35px;"></i>
+                                    <h4 class="card-title text-uppercase">Medium Vulnerabilities</h4>
+                                    <div class="row">
+                                        <div class="col-1">
+                                            <h3>{{ moderate_num }}</h3>
+                                        </div>
+                                        <div class="col">
+                                            <a class="btn btn-light" href="/dashboard/level/medium">View</a>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body-->
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+                <div class="col">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card titlebox-one">
+                                <div class="card-body ">
+                                    <i class='mdi mdi-laptop-windows float-end' style="font-size: 35px;"></i>
+                                    <h4 class="text-uppercase card-title"> IP's Scanned</h4>
+                                    <h3>{{ ip_num }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card titlebox-one">
+                                <div class="card-body ">
+                                    <i class='mdi mdi-dice-d10 float-end' style="font-size: 35px;"></i>
+                                    <h4 class="text-uppercase card-title"> Top 10</h4>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>IP Address</th>
+                                                <th>Vulnerabilities Found</th>
+                                                <th>Info</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ip in top_ten %}
+                                                <tr>
+                                                    <td>{{ ip.0 }}</td>
+                                                    <td>{{ ip.1 }}</td>
+                                                    {% load to_ip_format %}
+                                                    <td><a class="btn btn-primary" href="/addresses/{{ ip.0|to_ip_format }}/">Details</a></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end page title --> 
+</div> <!-- container -->
+{% endblock %}
+
