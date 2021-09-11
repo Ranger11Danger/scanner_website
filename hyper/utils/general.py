@@ -108,7 +108,7 @@ def select_slug(uuid, user):
 
 def num_cves(user):
     cves = port_info.objects.filter(user=user)
-    return(len(cves))
+    return(cves)
 
 def get_cve(slug, cve, user):
     cve = port_info.objects.filter(user=user).filter(scan_id = slug).filter(cve=cve)
@@ -168,3 +168,23 @@ def add_asset_to_group(ip, user, group):
 
 def del_asset_from_group(user, gid, address):
     asset.objects.filter(user=user, group = gid, address=address).delete()
+
+def get_top_ten(user):
+    ip_list = get_ips(user)
+    ip_stats = {}
+    for ip in ip_list[:10]:
+        score = 0
+        vulns = get_address_data(user, ip)
+        for vuln in vulns:
+            if vuln.score >= 9:
+                score += 3
+            elif vuln.score >= 7 and vuln.score < 9:
+                score += 2
+            elif vuln.score >= 4 and vuln.score < 7:
+                score += 1
+            elif vuln.score < 4:
+                score += .5
+        ip_stats[ip] = score
+    
+    
+    return sorted(ip_stats.items(), key=lambda x:x[1], reverse=True)

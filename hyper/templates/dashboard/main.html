@@ -15,44 +15,20 @@
         </div>
     </div>
     <!-- start page title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="row row-cols-1 row-cols-md-2 g-2">
-                <div class="col">
-                    <div class="card titlebox-one">
-                        <div class="card-body">
-                            <i class='mdi mdi-bug-outline float-end' style="font-size: 35px;"></i>
-                            <h4 class="card-title text-uppercase">CVE's Found</h4>
-                            <h3>{{ cve_nums }}</h3>
-                        </div> <!-- end card-body-->
-                    </div>
-                 </div>
-                <div class="col">
-                    <div class="card titlebox-one">
-                        <div class="card-body">
-                            <i class='mdi mdi-laptop-windows float-end' style="font-size: 35px;"></i>
-                            <h4 class="text-uppercase card-title"> IP's Scanned</h4>
-                            <h3>{{ scan_num }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- end page title --> 
-    <table class='table'>
+    <table id="basic-datatable" class="table dt-responsive nowrap w-100">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Address</th>
                 <th>Time Created</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
             {% for scan in scans %}
             <tr>
-                <td><h1>{{ scan.name }}</h1></td>
+                <td><h5>{{ scan.name }}</h5></td>
                 <td>{{ scan.address }}</td>
                 <td>{{ scan.created_at }}</td>
                 <td><a class="btn btn-primary" href="/dashboard/scan/{{ scan.slug }}">Details</a></td>
@@ -64,5 +40,8 @@
 
     
 </div> <!-- container -->
+<script>
+    $('#basic-datatable').DataTable();
+</script>
 {% endblock %}
 

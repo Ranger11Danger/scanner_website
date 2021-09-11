@@ -9,11 +9,19 @@
     {% if scan %}
         <div class="row">
             <div class="col-11">
-                <h1>{{ scan.0.name }}</h1>
+                {% if scan.0.name %}
+                    <h3>{{ scan.0.name }}</h3>
+                {% else %}
+                    <h3>{{ level }}</h3> 
+                {% endif %}
+                
             </div>
-            <div class="col-1 mt-1">
-                <a href="/scan/{{ slug }}/manage"><button class="btn btn-primary btn-rounded">Manage</button></a>
-            </div>
+            {% if scan.0.name %}
+                <div class="col-1 mt-1">
+                    <a href="/scan/{{ slug }}/manage"><button class="btn btn-primary btn-rounded">Manage</button></a>
+                </div>               
+            {% endif %}
+            
         </div>
         <table id="basic-datatable" class="table dt-responsive nowrap w-100">
             <thead>
