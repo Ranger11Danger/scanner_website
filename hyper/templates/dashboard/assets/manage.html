@@ -40,8 +40,9 @@
 </div> <!-- container -->
 
 <script>
-    document.getElementById("del_asset").selectedIndex = -1;
-    document.getElementById("add_asset").selectedIndex = -1;
+    setInterval(function(){
+        $("button[class$='select2-selection__choice__remove']").replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
+    },1);
 </script>
 {% endblock %}
 

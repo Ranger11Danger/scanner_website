@@ -8,7 +8,7 @@
 <div class="container-fluid">
     <h1> New Scan</h1>
     <div class="row">
-        <div class="col-2">
+        <div class="col-4">
             <form action="/scan/" method="post">
                 <div class="form-group">
                     {% csrf_token %}
@@ -18,7 +18,6 @@
             </form>
         </div>
     </div>
-   
     {% if address %}
         <h1>Name: {{ name }}</h1>
         <h1>Address: {{ address }}</h1>
@@ -34,5 +33,10 @@
             <div id="progress-bar-message">Waiting for progress to start...</div>
     {% endif %}
 </div> <!-- container -->
+<script>
+    setInterval(function(){
+        $("#select2-id_asset_groups-container").find('button').replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
+    },1);
+</script>
 {% endblock %}
 

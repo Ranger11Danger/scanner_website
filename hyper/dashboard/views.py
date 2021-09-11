@@ -46,11 +46,11 @@ class ScanView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/scan/scan.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['scan_form'] = ScanForm()
+        context['scan_form'] = ScanForm(self.request.user.id)
         return context
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = ScanForm(request.POST)
+        form = ScanForm(self.request.user.id, request.POST)
         if form.is_valid():
             context['name'] = form.cleaned_data['name']
             context['address'] = clense_ips(form.cleaned_data['address'])
@@ -144,7 +144,6 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
         context['gid'] = self.kwargs['groupid']
         return context
     def post(self, request, **kwargs):
-        print(request.POST.get('delete'))
         context = self.get_context_data(**kwargs)
         if request.POST.get('change_name'):
             form = CreateAssetGroup(request.POST)
@@ -155,14 +154,16 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
         if request.POST.get('add'):
             form = AddAssetForm(request.user.id, request.POST)
             if form.is_valid():
-                for x in form.cleaned_data['addresses']:
+                for x in form.cleaned_data['Add Addresses']:
                     if x != "None":
                         add_asset_to_group(x, request.user.id, self.kwargs['groupid'])
                 return redirect("/assets/")
         if request.POST.get('delete') == "Submit":
             form = DeleteAssetForm(request.user.id, self.kwargs['groupid'], request.POST)
+            
             if form.is_valid():
-                for x in form.cleaned_data['addresses']:
+                print(form.cleaned_data)
+                for x in form.cleaned_data['Remove Addresses']:
                     if x != "None":
                         del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
                 return redirect("/assets/")
