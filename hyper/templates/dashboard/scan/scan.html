@@ -34,9 +34,34 @@
     {% endif %}
 </div> <!-- container -->
 <script>
+    let x = 1
     setInterval(function(){
         $("#select2-id_asset_groups-container").find('button').replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
+        if(x === 1){
+            $("label[for$='id_custom_range']").hide()
+            document.getElementById('id_custom_range').style.display = 'none';
+            x = x +1;
+        }
     },1);
+    document.getElementById('id_ports_2').onchange = function() {
+    document.getElementById('id_custom_range').disabled = false;
+    document.getElementById('id_custom_range').style.display = 'inline';
+    $("label[for$='id_custom_range']").show();
+    };
+    document.getElementById('id_ports_1').onchange = function() {
+    document.getElementById('id_custom_range').disabled = true;
+    document.getElementById('id_custom_range').value = '';
+    $("label[for$='id_custom_range']").hide();
+    document.getElementById('id_custom_range').style.display = 'none';
+    };
+    document.getElementById('id_ports_0').onchange = function() {
+    document.getElementById('id_custom_range').disabled = true;
+    document.getElementById('id_custom_range').value = '';
+    $("label[for$='id_custom_range']").hide();
+    document.getElementById('id_custom_range').style.display = 'none';
+
+    };
+    
 </script>
 {% endblock %}
 

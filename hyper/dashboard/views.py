@@ -46,7 +46,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/scan/scan.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['scan_form'] = ScanForm(self.request.user.id)
+        context['scan_form'] = ScanForm(self.request.user.id, initial={'ports':'top'})
         return context
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
