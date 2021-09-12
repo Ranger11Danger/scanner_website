@@ -1,7 +1,8 @@
 import json
 from hyper.dashboard.models import scan, port_info, asset_group, asset
 from .process_scan import read_scan
-import ipaddress
+import ipaddress 
+from ipaddress import ip_address
 class GenericObject(dict):
     """
     A dict subclass that provides access to its members as if they were
@@ -188,3 +189,26 @@ def get_top_ten(user):
     
     
     return sorted(ip_stats.items(), key=lambda x:x[1], reverse=True)
+
+def ipRange(start, end):
+    start_int = int(ip_address(start).packed.hex(), 16)
+    end_int = int(ip_address(end).packed.hex(), 16)
+    ip_list = [ip_address(ip).exploded for ip in range(start_int, end_int)]
+    ip_list.append(end)
+    return ip_list
+
+
+def parse_scan_addresses(addresses):
+    ips_to_scan =[]
+    for ip in addresses.replace(' ', '').split(','):
+        if '-' in ip:
+            split_range = ip.split('-')
+            for x in ipRange(split_range[0], split_range[1]):
+                ips_to_scan.append(x)
+        elif '/' in ip:
+            net = ipaddress.ip_network(ip)
+            for x in net.hosts():
+                ips_to_scan.append(str(x))
+        else:
+            ips_to_scan.append(ip)
+    return list(set(ips_to_scan))
