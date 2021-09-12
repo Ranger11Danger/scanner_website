@@ -200,15 +200,19 @@ def ipRange(start, end):
 
 def parse_scan_addresses(addresses):
     ips_to_scan =[]
+    address_details = []
     for ip in addresses.replace(' ', '').split(','):
         if '-' in ip:
             split_range = ip.split('-')
             for x in ipRange(split_range[0], split_range[1]):
                 ips_to_scan.append(x)
+            address_details.append(ip)
         elif '/' in ip:
             net = ipaddress.ip_network(ip)
             for x in net.hosts():
                 ips_to_scan.append(str(x))
+            address_details.append(ip)
         else:
             ips_to_scan.append(ip)
-    return list(set(ips_to_scan))
+            address_details.append(ip)
+    return(list(set(ips_to_scan)), address_details)

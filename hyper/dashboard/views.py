@@ -53,9 +53,9 @@ class ScanView(LoginRequiredMixin, TemplateView):
         form = ScanForm(self.request.user.id, request.POST)
         if form.is_valid():
             context['name'] = form.cleaned_data['name']
-            context['address'] = clense_ips(form.cleaned_data['address'])
+            context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
-            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],", ".join(clense_ips(form.cleaned_data['address'])))
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
             context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             
 

@@ -11,11 +11,12 @@ class ScanForm(forms.Form):
         ('custom', 'Custom Range')
     ]
     ports = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
-    custom_range = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'port range'}))
+    custom_range = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'port range'}), required=False)
     def __init__(self, user, *args, **kwargs):
         super(ScanForm, self).__init__(*args,**kwargs)
         self.fields['asset_groups'] = forms.MultipleChoiceField(
             choices = [(group['name'], group['name']) for group in asset_group.objects.filter(user=user).values('name').distinct()],
+            required=False
             )
         self.fields['asset_groups'].widget.attrs.update({'class':'select2 form-control select2-multiple', 'data-toggle' : 'select2', 'multiple' : 'multiple'})
 

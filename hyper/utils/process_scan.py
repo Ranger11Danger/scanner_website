@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from celery import shared_task
 from hyper.dashboard.models import port_info
 from celery_progress.backend import ProgressRecorder
+import subprocess
 
 API_KEY = '25fe06fb-0c6b-475a-9963-59767924c909'
 API_PASS = '53692957-ab54-4712-9716-884b10b82e1a'
@@ -148,3 +149,11 @@ def read_scan(self, scan, slug):
         sleep(.5)
     return "Done"
 
+@shared_task(bind=True)
+def scan_target(target, slug):
+    subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+    read_scan.delay(f"/workspaces/scanner_website/hyper/scans/{target}.xml", slug)
+
+def scan_all(target_list):
+    for target in target_list:
+        scan_target.delay(target)
