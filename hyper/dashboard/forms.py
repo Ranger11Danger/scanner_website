@@ -2,7 +2,7 @@ from django import forms
 from django.forms.widgets import HiddenInput
 from .models import asset, port_info, asset_group
 class ScanForm(forms.Form):
-    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}))
+    #name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}))
     scan_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Scan Name'}))
     address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'EX: 192.168.1.1, 192.168.1.10-192.168.1.15, 192.168.2.0/24'}))
     CHOICES =[

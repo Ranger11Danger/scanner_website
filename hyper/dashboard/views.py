@@ -1,3 +1,4 @@
+from hyper.utils.process_scan import scan_all
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.checks.messages import Critical
@@ -52,11 +53,12 @@ class ScanView(LoginRequiredMixin, TemplateView):
         context = self.get_context_data(**kwargs)
         form = ScanForm(self.request.user.id, request.POST)
         if form.is_valid():
-            context['name'] = form.cleaned_data['name']
+            #context['name'] = form.cleaned_data['name']
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
             slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
-            context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug)
             
 
         return self.render_to_response(context)

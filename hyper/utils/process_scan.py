@@ -127,33 +127,33 @@ def process_edb(self, id, scan_port, address, cve_text, uniq_list, slug):
                 pass
     return "Done"
         
-@shared_task(bind=True)
-def read_scan(self, scan, slug):
+
+def read_scan(scan, slug):
     scan_result = parseXML(scan)
-    progress_recorder = ProgressRecorder(self)
+    #progress_recorder = ProgressRecorder(self)
     cve_list = filter_results('cve', scan_result)
     edb_list = filter_results('exploitdb', scan_result)
     cve_text = [x.id for x in cve_list]
     scan_len = len(cve_list) + len(edb_list)
     temp = 0
     for cve in cve_list:
-        progress_recorder.set_progress(temp + 1, scan_len)
+        #progress_recorder.set_progress(temp + 1, scan_len)
         process_cve.delay(cve.id, cve.port, cve.address, slug)
         sleep(.5)
         temp += 1
     uniq_list = cve_text
     for edbid in edb_list:
-        progress_recorder.set_progress(temp+ 1, scan_len)
+        #progress_recorder.set_progress(temp+ 1, scan_len)
         process_edb.delay(edbid.id, edbid.port, edbid.address, cve_text, uniq_list, slug)
         temp += 1
         sleep(.5)
     return "Done"
 
 @shared_task(bind=True)
-def scan_target(target, slug):
+def scan_target(self, target, slug):
     subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
-    read_scan.delay(f"/workspaces/scanner_website/hyper/scans/{target}.xml", slug)
+    read_scan(f"/workspaces/scanner_website/hyper/scans/{target}.xml", slug)
 
-def scan_all(target_list):
+def scan_all(target_list, slug):
     for target in target_list:
-        scan_target.delay(target)
+        scan_target.delay(target, slug)
