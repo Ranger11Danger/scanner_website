@@ -27,6 +27,7 @@
             {% for ip in ip_list %}
             <tr>
                 <td>{{ ip.0 }}</td>
+                {% load to_ip_format %}
                 <td><a class="btn btn-primary" href="/addresses/{{ ip.1|to_ip_format }}">Details</a></td>
             </tr>
             {% endfor %}
