@@ -8,6 +8,7 @@ from celery import shared_task
 from hyper.dashboard.models import port_info
 from celery_progress.backend import ProgressRecorder
 import subprocess
+import os
 
 API_KEY = '25fe06fb-0c6b-475a-9963-59767924c909'
 API_PASS = '53692957-ab54-4712-9716-884b10b82e1a'
@@ -149,16 +150,20 @@ def read_scan(scan, slug):
         sleep(.5)
     return "Done"
 
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+
 @shared_task(bind=True)
 def scan_target(self, target, slug,ports, custom_ports):
     if ports == 'top':
-        subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+        subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"{BASE_DIR}/scans/{target}.xml"])
     elif ports == 'all':
-        subprocess.run(["nmap","-sV","-p 1-65535","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+        subprocess.run(["nmap","-sV","-p 1-65535","--script=vulners", target, "-oX", f"{BASE_DIR}/scans/{target}.xml"])
     else:
-        subprocess.run(["nmap","-sV",f"-p {custom_ports}","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+        subprocess.run(["nmap","-sV",f"-p {custom_ports}","--script=vulners", target, "-oX", f"{BASE_DIR}/scans/{target}.xml"])
 
-    read_scan(f"/workspaces/scanner_website/hyper/scans/{target}.xml", slug)
+    read_scan(f"{BASE_DIR}/scans/{target}.xml", slug)
 
 def scan_all(target_list, slug,ports, custom_ports):
     for target in target_list:
