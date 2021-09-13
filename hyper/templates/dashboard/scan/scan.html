@@ -13,10 +13,10 @@
     {% endif %}
     <div class="row">
         <div class="col-4">
-            {% if is_asset_group == True %}
+            {% if is_asset_group is True %}
                 <form action="/assets/{{ groupid }}/scan" method="post">
             {% else %}
-                <form action="/scan/" method="post"></form>
+                <form action="/scan/" method="post">
             {% endif %}
             
                 <div class="form-group">

@@ -48,12 +48,13 @@ class ScanView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['scan_form'] = ScanForm(self.request.user.id, initial={'ports':'top'})
+        context['is_asset_group'] = False
         return context
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
         form = ScanForm(self.request.user.id, request.POST)
+        print(form.errors)
         if form.is_valid():
-            #context['name'] = form.cleaned_data['name']
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
 
@@ -70,7 +71,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
             print a message after they submit the scan saying its running in the background
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            #scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
@@ -257,7 +258,7 @@ class AssetScanView(LoginRequiredMixin, TemplateView):
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             
-            scan_all(addresses,slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            #scan_all(addresses,slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
