@@ -235,7 +235,7 @@ class DashboardScoreView(LoginRequiredMixin, TemplateView):
             context['level'] = 'High Level Vulnerabilities'
             context['data'] = num_cves(self.request.user.id).filter(score__gte=7).filter(score__lt=9)
         elif level == 'medium':
-            context['level'] = 'Mediu Level Vulnerabilities'
+            context['level'] = 'Medium Level Vulnerabilities'
             context['data'] = num_cves(self.request.user.id).filter(score__gte=4).filter(score__lt=7)
         return context
 
