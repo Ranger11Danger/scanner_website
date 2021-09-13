@@ -158,9 +158,17 @@ def get_assets(user, group):
 def create_asset_group(user, name):
     group = asset_group(user=user, name=name)
     group.save()
+    return str(group.id)
+
+def delete_asset_group(user, gid):
+    asset_group.objects.filter(user=user, id=gid).delete()
 
 def change_group_name(gid, name):
     asset_group.objects.filter(id = gid).update(name = name)
+
+def get_group_id(user, gname):
+    group = asset_group.objects.filter(user=user, name=gname)
+    return str(group[0].id)
 
 def add_asset_to_group(ip, user, group):
     group_obj = asset_group.objects.filter(id=group)

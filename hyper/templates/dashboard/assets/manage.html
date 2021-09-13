@@ -36,6 +36,11 @@
             {{ del_asset_form }}
             <input type="Submit" class="btn btn-primary" name="delete" id="del">
         </form>
+        <form method="post" action="/assets/manage/{{ gid }}/">
+            {% csrf_token %}
+            <label for="remove" class="mt-2">Delete Asset Group</label><br>
+            <button type="submit" value="Delete" class="btn btn-primary" name="remove" id="remove">Delete</button>
+        </form>
     </div>
 </div> <!-- container -->
 

@@ -1,3 +1,4 @@
+from xml.etree.ElementTree import parse
 from hyper.utils.process_scan import scan_all
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -57,7 +58,11 @@ class ScanView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
-
+            
+            for group_name in form.cleaned_data['asset_groups']:
+                gid = get_group_id(self.request.user.id, group_name)
+                for ip in parse_scan_addresses(form.cleaned_data['address'])[0]:
+                    add_asset_to_group(ip, self.request.user.id, gid)
             """
             Check to see if there are old scan results that have the same addresses
             and delete them, there could be other possible solutions to this
@@ -146,7 +151,10 @@ class CreateAssetGroupView(LoginRequiredMixin, TemplateView):
         context = self.get_context_data(**kwargs)
         form = CreateAssetGroup(self.request.user.id, request.POST)
         if form.is_valid():
-            create_asset_group(request.user.id, form.cleaned_data['name'])
+            gid = create_asset_group(request.user.id, form.cleaned_data['name'])
+            addresses = form.cleaned_data['Add Addresses']
+            for ip in addresses:
+                add_asset_to_group(ip, self.request.user.id, gid)
             return redirect('/assets/')
         return self.render_to_response(context)
 
@@ -184,6 +192,9 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
                     if x != "None":
                         del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
                 return redirect("/assets/")
+        if request.POST.get('remove'):
+            delete_asset_group(self.request.user.id, self.kwargs['groupid'])
+            return redirect('/')
         return self.render_to_response(context)
         
 class AssetGroupAddressView(LoginRequiredMixin, TemplateView):
