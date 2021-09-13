@@ -34,7 +34,7 @@
         <form action="/assets/manage/{{ gid }}/" method="POST">
             {% csrf_token %}
             {{ del_asset_form }}
-            <input type="Submit" class="btn btn-primary" name="delete" id="del">
+            <input type="Submit" value="Submit" class="btn btn-primary" name="delete" id="del">
         </form>
         <form method="post" action="/assets/manage/{{ gid }}/">
             {% csrf_token %}
