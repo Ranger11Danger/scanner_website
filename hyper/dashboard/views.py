@@ -56,6 +56,13 @@ class ScanView(LoginRequiredMixin, TemplateView):
             #context['name'] = form.cleaned_data['name']
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
+
+            '''
+            Check to see if there are old scan results that have the same addresses
+            and delete them, there could be other possible solutions to this
+            as this will remove results from older scans
+            '''
+            delete_old_addresses(parse_scan_addresses(form.cleaned_data['address'])[0])
             slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'])

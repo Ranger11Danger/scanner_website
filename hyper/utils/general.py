@@ -216,3 +216,7 @@ def parse_scan_addresses(addresses):
             ips_to_scan.append(ip)
             address_details.append(ip)
     return(list(set(ips_to_scan)), address_details)
+
+def delete_old_addresses(address_list):
+    for address in address_list:
+        port_info.objects.filter(ip = address).delete()
