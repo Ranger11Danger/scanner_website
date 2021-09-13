@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.checks.messages import Critical
 from django.urls import reverse
 from django.views.generic import TemplateView
-from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm
+from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm, AssetScanForm
 from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
@@ -70,7 +70,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
             print a message after they submit the scan saying its running in the background
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            #scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'])
+            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
@@ -227,6 +227,42 @@ class DashboardScoreView(LoginRequiredMixin, TemplateView):
             context['data'] = num_cves(self.request.user.id).filter(score__gte=4).filter(score__lt=7)
         return context
 
+class AssetScanView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/scan/scan.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['scan_form'] = AssetScanForm(initial={'ports':'top'})
+        context['is_asset_group'] = True
+        context['groupid'] = self.kwargs['groupid']
+        return context
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = AssetScanForm(request.POST)
+        
+        if form.is_valid():
+            #context['name'] = form.cleaned_data['name']
+            context['scan_name'] = form.cleaned_data['scan_name']
+            """
+            Check to see if there are old scan results that have the same addresses
+            and delete them, there could be other possible solutions to this
+            as this will remove results from older scans
+            """
+            addresses = get_assets(self.request.user.id, self.kwargs['groupid'])
+            delete_old_addresses(addresses)
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],addresses)
+
+            """
+            Im not sure how to calculate the percent of the work done so for now we
+            print a message after they submit the scan saying its running in the background
+            """
+            #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            
+            scan_all(addresses,slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            context['scan_status'] = "scanning"
+            
+
+        return self.render_to_response(context)
+
 dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
@@ -241,3 +277,4 @@ asset_group_create_view = CreateAssetGroupView.as_view()
 asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
 dashboard_score_view = DashboardScoreView.as_view()
+asset_group_scan_view = AssetScanView.as_view()

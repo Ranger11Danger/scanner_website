@@ -6,10 +6,19 @@
 {% block content %}
 <!-- Start Content-->
 <div class="container-fluid">
+    {% if is_asset_group == True %}
+    <h1>Scan Asset Group</h1>
+    {% else %}
     <h1> New Scan</h1>
+    {% endif %}
     <div class="row">
         <div class="col-4">
-            <form action="/scan/" method="post">
+            {% if is_asset_group == True %}
+                <form action="/assets/{{ groupid }}/scan" method="post">
+            {% else %}
+                <form action="/scan/" method="post"></form>
+            {% endif %}
+            
                 <div class="form-group">
                     {% csrf_token %}
                     {{ scan_form }}

@@ -49,3 +49,14 @@ class DeleteAssetForm(forms.Form):
             choices=[(ip['address'], ip['address']) for ip in asset.objects.filter(user=user, group=groupid).values('address').distinct()],
         )
         self.fields['Remove Addresses'].widget.attrs.update({'class':'select2 form-control select2-multiple', 'data-toggle' : 'select2', 'multiple' : 'multiple'})
+
+class AssetScanForm(forms.Form):
+    #name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}))
+    scan_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Scan Name'}))
+    CHOICES =[
+        ('all_ports', 'All Ports'),
+        ('top', 'Top 1000'),
+        ('custom', 'Custom Range')
+    ]
+    ports = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
+    custom_range = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'port range'}), required=False)
