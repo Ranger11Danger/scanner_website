@@ -25,7 +25,13 @@ class RenameScanForm(forms.Form):
 
 class CreateAssetGroup(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'New Name'}))
-
+    def __init__(self, user, *args, **kwargs):
+        super(CreateAssetGroup, self).__init__(*args,**kwargs)
+        self.fields['Add Addresses'] = forms.MultipleChoiceField(
+            choices=[(ip['ip'], ip['ip']) for ip in port_info.objects.filter(user=user).values('ip').distinct()],
+            required=False
+        )
+        self.fields['Add Addresses'].widget.attrs.update({'class':'select2 form-control select2-multiple', 'data-toggle' : 'select2', 'multiple' : 'multiple'})
 
 
 class AddAssetForm(forms.Form):

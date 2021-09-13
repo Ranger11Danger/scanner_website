@@ -18,6 +18,10 @@
             </form>
         </div>
     </div>
+    {% if scan_status %}
+        <h3>Scan will continue to run in the background and will update results over time</h3>
+        <h3>This could take some time...</h3>
+    {% endif %}
 </div> <!-- container -->
 <script>
     let x = 1
