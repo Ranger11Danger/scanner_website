@@ -33,7 +33,7 @@ class ScanDetailsView(LoginRequiredMixin, TemplateView):
         context['scan'] = selected_scan
         if len(selected_scan) >= 1:
             context['data'] = get_scan_data(self.kwargs['slug'][5:], self.request.user.id)
-        return context   
+        return context
 class CveDetailsView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/scan/cve_details.html"
     def get_context_data(self, **kwargs):
@@ -58,7 +58,8 @@ class ScanView(LoginRequiredMixin, TemplateView):
             context['scan_name'] = form.cleaned_data['scan_name']
             slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug)
+            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'])
+            print(form.cleaned_data['ports'])
             
 
         return self.render_to_response(context)

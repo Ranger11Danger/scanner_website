@@ -150,10 +150,16 @@ def read_scan(scan, slug):
     return "Done"
 
 @shared_task(bind=True)
-def scan_target(self, target, slug):
-    subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+def scan_target(self, target, slug,ports):
+    if ports == 'top':
+        subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+    elif ports == 'all':
+        subprocess.run(["nmap","-sV","-p 1-65535","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+    else:
+        subprocess.run(["nmap","-sV",f"-p {ports}","--script=vulners", target, "-oX", f"/workspaces/scanner_website/hyper/scans/{target}.xml"])
+
     read_scan(f"/workspaces/scanner_website/hyper/scans/{target}.xml", slug)
 
-def scan_all(target_list, slug):
+def scan_all(target_list, slug,ports):
     for target in target_list:
-        scan_target.delay(target, slug)
+        scan_target.delay(target, slug, ports)
