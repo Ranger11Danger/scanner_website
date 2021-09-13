@@ -76,7 +76,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
             print a message after they submit the scan saying its running in the background
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            #scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            #scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
@@ -269,7 +269,7 @@ class AssetScanView(LoginRequiredMixin, TemplateView):
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
             
-            #scan_all(addresses,slug,form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            #scan_all(addresses,slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 

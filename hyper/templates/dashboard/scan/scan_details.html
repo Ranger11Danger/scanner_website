@@ -42,7 +42,7 @@
                         <td>{{ x.ip }}</td>
                         <td>{{ x.port }}</td>
                         <td>{{ x.score }}</td>
-                        <td><a href="{{ x.cve }}" type="button" class="btn btn-primary btn-rounded">Details</a></td>
+                        <td><a href="/addresses/{{ x.ip }}/{{ x.cve }}" type="button" class="btn btn-primary btn-rounded">Details</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
