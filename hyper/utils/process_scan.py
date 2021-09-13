@@ -150,9 +150,7 @@ def read_scan(scan, slug):
         sleep(.5)
     return "Done"
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
 
 @shared_task(bind=True)
 def scan_target(self, target, slug,ports, custom_ports):
