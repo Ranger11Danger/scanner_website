@@ -154,7 +154,7 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         #TODO give rename its own form
-        context['change_name_form'] = CreateAssetGroup(self.request.user.id)
+        context['change_name_form'] = RenameScanForm()
         context['add_asset_form'] = AddAssetForm(self.request.user.id)
         context['del_asset_form'] = DeleteAssetForm(self.request.user.id, self.kwargs['groupid'])
         context['gid'] = self.kwargs['groupid']
@@ -162,7 +162,7 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
         if request.POST.get('change_name'):
-            form = CreateAssetGroup(request.POST)
+            form = RenameScanForm(request.POST)
             if form.is_valid():
                 groupid = self.kwargs['groupid']
                 change_group_name(groupid, form.cleaned_data['name'])
