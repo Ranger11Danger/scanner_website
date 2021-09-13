@@ -28,6 +28,11 @@
             </form>
         </div>
     </div>
-</div> <!-- container -->
+</div>
+<script>
+    setInterval(function(){
+        $("button[class$='select2-selection__choice__remove']").replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
+    },1);
+</script> <!-- container -->
 {% endblock %}
 

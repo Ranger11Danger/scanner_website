@@ -4,14 +4,14 @@ from .base import env
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-DEBUG = True
+DEBUG = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env(
     "DJANGO_SECRET_KEY",
     default="cvvB1hSeYLxi0udC5X81f457yIs8fvdzAQEcMD4w9kg0HgRxuvSIJQH6vBodusLQ",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1","159.89.142.33"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1","159.89.142.33", "test-site"]
 
 # CACHES
 # ------------------------------------------------------------------------------

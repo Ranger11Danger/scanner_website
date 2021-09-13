@@ -6,10 +6,19 @@
 {% block content %}
 <!-- Start Content-->
 <div class="container-fluid">
+    {% if is_asset_group == True %}
+    <h1>Scan Asset Group</h1>
+    {% else %}
     <h1> New Scan</h1>
+    {% endif %}
     <div class="row">
-        <div class="col-2">
-            <form action="/scan/" method="post">
+        <div class="col-4">
+            {% if is_asset_group is True %}
+                <form action="/assets/{{ groupid }}/scan" method="post">
+            {% else %}
+                <form action="/scan/" method="post">
+            {% endif %}
+            
                 <div class="form-group">
                     {% csrf_token %}
                     {{ scan_form }}
@@ -18,21 +27,40 @@
             </form>
         </div>
     </div>
-   
-    {% if address %}
-        <h1>Name: {{ name }}</h1>
-        <h1>Address: {{ address }}</h1>
-        <script src="{% static 'celery_progress/celery_progress.js' %}"></script>
-        <script>// vanilla JS version
-            document.addEventListener("DOMContentLoaded", function () {
-              var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
-              CeleryProgressBar.initProgressBar(progressUrl);
-            });</script>
-            <div class='progress-wrapper'>
-                <div id='progress-bar' class='progress-bar' style="background-color: #68a9ef; width: 0%;">&nbsp;</div>
-            </div>
-            <div id="progress-bar-message">Waiting for progress to start...</div>
+    {% if scan_status %}
+        <h3>Scan will continue to run in the background and will update results over time</h3>
+        <h3>This could take some time...</h3>
     {% endif %}
 </div> <!-- container -->
+<script>
+    let x = 1
+    setInterval(function(){
+        $("#select2-id_asset_groups-container").find('button').replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
+        if(x === 1){
+            $("label[for$='id_custom_range']").hide()
+            document.getElementById('id_custom_range').style.display = 'none';
+            x = x +1;
+        }
+    },1);
+    document.getElementById('id_ports_2').onchange = function() {
+    document.getElementById('id_custom_range').disabled = false;
+    document.getElementById('id_custom_range').style.display = 'inline';
+    $("label[for$='id_custom_range']").show();
+    };
+    document.getElementById('id_ports_1').onchange = function() {
+    document.getElementById('id_custom_range').disabled = true;
+    document.getElementById('id_custom_range').value = '';
+    $("label[for$='id_custom_range']").hide();
+    document.getElementById('id_custom_range').style.display = 'none';
+    };
+    document.getElementById('id_ports_0').onchange = function() {
+    document.getElementById('id_custom_range').disabled = true;
+    document.getElementById('id_custom_range').value = '';
+    $("label[for$='id_custom_range']").hide();
+    document.getElementById('id_custom_range').style.display = 'none';
+
+    };
+    
+</script>
 {% endblock %}
 

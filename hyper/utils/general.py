@@ -1,7 +1,8 @@
 import json
 from hyper.dashboard.models import scan, port_info, asset_group, asset
 from .process_scan import read_scan
-import ipaddress
+import ipaddress 
+from ipaddress import ip_address
 class GenericObject(dict):
     """
     A dict subclass that provides access to its members as if they were
@@ -157,9 +158,17 @@ def get_assets(user, group):
 def create_asset_group(user, name):
     group = asset_group(user=user, name=name)
     group.save()
+    return str(group.id)
+
+def delete_asset_group(user, gid):
+    asset_group.objects.filter(user=user, id=gid).delete()
 
 def change_group_name(gid, name):
     asset_group.objects.filter(id = gid).update(name = name)
+
+def get_group_id(user, gname):
+    group = asset_group.objects.filter(user=user, name=gname)
+    return str(group[0].id)
 
 def add_asset_to_group(ip, user, group):
     group_obj = asset_group.objects.filter(id=group)
@@ -188,3 +197,34 @@ def get_top_ten(user):
     
     
     return sorted(ip_stats.items(), key=lambda x:x[1], reverse=True)
+
+def ipRange(start, end):
+    start_int = int(ip_address(start).packed.hex(), 16)
+    end_int = int(ip_address(end).packed.hex(), 16)
+    ip_list = [ip_address(ip).exploded for ip in range(start_int, end_int)]
+    ip_list.append(end)
+    return ip_list
+
+
+def parse_scan_addresses(addresses):
+    ips_to_scan =[]
+    address_details = []
+    for ip in addresses.replace(' ', '').split(','):
+        if '-' in ip:
+            split_range = ip.split('-')
+            for x in ipRange(split_range[0], split_range[1]):
+                ips_to_scan.append(x)
+            address_details.append(ip)
+        elif '/' in ip:
+            net = ipaddress.ip_network(ip)
+            for x in net.hosts():
+                ips_to_scan.append(str(x))
+            address_details.append(ip)
+        else:
+            ips_to_scan.append(ip)
+            address_details.append(ip)
+    return(list(set(ips_to_scan)), address_details)
+
+def delete_old_addresses(address_list):
+    for address in address_list:
+        port_info.objects.filter(ip = address).delete()

@@ -1,9 +1,11 @@
+from xml.etree.ElementTree import parse
+from hyper.utils.process_scan import scan_all
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.checks.messages import Critical
 from django.urls import reverse
 from django.views.generic import TemplateView
-from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm
+from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm, AssetScanForm
 from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
@@ -32,7 +34,7 @@ class ScanDetailsView(LoginRequiredMixin, TemplateView):
         context['scan'] = selected_scan
         if len(selected_scan) >= 1:
             context['data'] = get_scan_data(self.kwargs['slug'][5:], self.request.user.id)
-        return context   
+        return context
 class CveDetailsView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/scan/cve_details.html"
     def get_context_data(self, **kwargs):
@@ -46,17 +48,36 @@ class ScanView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/scan/scan.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['scan_form'] = ScanForm()
+        context['scan_form'] = ScanForm(self.request.user.id, initial={'ports':'top'})
+        context['is_asset_group'] = False
         return context
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = ScanForm(request.POST)
+        form = ScanForm(self.request.user.id, request.POST)
+        print(form.errors)
         if form.is_valid():
-            context['name'] = form.cleaned_data['name']
-            context['address'] = clense_ips(form.cleaned_data['address'])
+            context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
-            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],", ".join(clense_ips(form.cleaned_data['address'])))
-            context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            
+            for group_name in form.cleaned_data['asset_groups']:
+                gid = get_group_id(self.request.user.id, group_name)
+                for ip in parse_scan_addresses(form.cleaned_data['address'])[0]:
+                    add_asset_to_group(ip, self.request.user.id, gid)
+            """
+            Check to see if there are old scan results that have the same addresses
+            and delete them, there could be other possible solutions to this
+            as this will remove results from older scans
+            """
+            delete_old_addresses(parse_scan_addresses(form.cleaned_data['address'])[0])
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
+
+            """
+            Im not sure how to calculate the percent of the work done so for now we
+            print a message after they submit the scan saying its running in the background
+            """
+            #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            context['scan_status'] = "scanning"
             
 
         return self.render_to_response(context)
@@ -124,13 +145,16 @@ class CreateAssetGroupView(LoginRequiredMixin, TemplateView):
     template_name ="dashboard/assets/create.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['create_form'] = CreateAssetGroup()
+        context['create_form'] = CreateAssetGroup(self.request.user.id)
         return context
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = CreateAssetGroup(request.POST)
+        form = CreateAssetGroup(self.request.user.id, request.POST)
         if form.is_valid():
-            create_asset_group(request.user.id, form.cleaned_data['name'])
+            gid = create_asset_group(request.user.id, form.cleaned_data['name'])
+            addresses = form.cleaned_data['Add Addresses']
+            for ip in addresses:
+                add_asset_to_group(ip, self.request.user.id, gid)
             return redirect('/assets/')
         return self.render_to_response(context)
 
@@ -138,16 +162,16 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/assets/manage.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_name_form'] = CreateAssetGroup()
+        #TODO give rename its own form
+        context['change_name_form'] = RenameScanForm()
         context['add_asset_form'] = AddAssetForm(self.request.user.id)
         context['del_asset_form'] = DeleteAssetForm(self.request.user.id, self.kwargs['groupid'])
         context['gid'] = self.kwargs['groupid']
         return context
     def post(self, request, **kwargs):
-        print(request.POST.get('delete'))
         context = self.get_context_data(**kwargs)
         if request.POST.get('change_name'):
-            form = CreateAssetGroup(request.POST)
+            form = RenameScanForm(request.POST)
             if form.is_valid():
                 groupid = self.kwargs['groupid']
                 change_group_name(groupid, form.cleaned_data['name'])
@@ -155,17 +179,22 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
         if request.POST.get('add'):
             form = AddAssetForm(request.user.id, request.POST)
             if form.is_valid():
-                for x in form.cleaned_data['addresses']:
+                for x in form.cleaned_data['Add Addresses']:
                     if x != "None":
                         add_asset_to_group(x, request.user.id, self.kwargs['groupid'])
                 return redirect("/assets/")
         if request.POST.get('delete') == "Submit":
             form = DeleteAssetForm(request.user.id, self.kwargs['groupid'], request.POST)
+            
             if form.is_valid():
-                for x in form.cleaned_data['addresses']:
+                print(form.cleaned_data)
+                for x in form.cleaned_data['Remove Addresses']:
                     if x != "None":
                         del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
                 return redirect("/assets/")
+        if request.POST.get('remove'):
+            delete_asset_group(self.request.user.id, self.kwargs['groupid'])
+            return redirect('/')
         return self.render_to_response(context)
         
 class AssetGroupAddressView(LoginRequiredMixin, TemplateView):
@@ -210,6 +239,42 @@ class DashboardScoreView(LoginRequiredMixin, TemplateView):
             context['data'] = num_cves(self.request.user.id).filter(score__gte=4).filter(score__lt=7)
         return context
 
+class AssetScanView(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard/scan/scan.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['scan_form'] = AssetScanForm(initial={'ports':'top'})
+        context['is_asset_group'] = True
+        context['groupid'] = self.kwargs['groupid']
+        return context
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = AssetScanForm(request.POST)
+        
+        if form.is_valid():
+            #context['name'] = form.cleaned_data['name']
+            context['scan_name'] = form.cleaned_data['scan_name']
+            """
+            Check to see if there are old scan results that have the same addresses
+            and delete them, there could be other possible solutions to this
+            as this will remove results from older scans
+            """
+            addresses = get_assets(self.request.user.id, self.kwargs['groupid'])
+            delete_old_addresses(addresses)
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],addresses)
+
+            """
+            Im not sure how to calculate the percent of the work done so for now we
+            print a message after they submit the scan saying its running in the background
+            """
+            #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
+            
+            scan_all(addresses,slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            context['scan_status'] = "scanning"
+            
+
+        return self.render_to_response(context)
+
 dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
@@ -224,3 +289,4 @@ asset_group_create_view = CreateAssetGroupView.as_view()
 asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
 dashboard_score_view = DashboardScoreView.as_view()
+asset_group_scan_view = AssetScanView.as_view()
