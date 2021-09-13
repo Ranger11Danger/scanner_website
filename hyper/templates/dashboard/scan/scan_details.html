@@ -42,6 +42,7 @@
                         <td>{{ x.ip }}</td>
                         <td>{{ x.port }}</td>
                         <td>{{ x.score }}</td>
+                        {% load to_ip_format %}
                         <td><a href="/addresses/{{ x.ip|to_ip_format }}/{{ x.cve }}" type="button" class="btn btn-primary btn-rounded">Details</a></td>
                     </tr>
                 {% endfor %}
