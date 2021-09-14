@@ -25,6 +25,8 @@
                 <th>Name</th>
                 <th>Members</th>
                 <th>Details</th>
+                <th>Manage</th>
+                <th>Scan</th>
                 <th>Download</th>
             </tr>
         </thead>
@@ -39,11 +41,10 @@
                         {% endfor %}
                     </ul>
                 </td>
-                <td><a class="btn btn-primary" href="/assets/{{ group.0.id }}">Details</a>
-                    <a class="btn btn-primary pl-3" href="/assets/manage/{{ group.0.id }}">Manage</a>
-                    <a class="btn btn-primary pl-3" href="/assets/{{ group.0.id }}/scan">Scan Asset Group</a>
-                    <a class="btn btn-primary pl-3" href="/download/group/{{ group.0.id }}">Download Report</a>
-                </td>
+                <td><a class="btn btn-primary" href="/assets/{{ group.0.id }}">Details</a></td>
+                <td><a class="btn btn-primary pl-3" href="/assets/manage/{{ group.0.id }}">Manage</a></td>
+                <td><a class="btn btn-primary pl-3" href="/assets/{{ group.0.id }}/scan">Scan Asset Group</a></td>
+                <td><a class="btn btn-primary pl-3" href="/download/group/{{ group.0.id }}">Download Report</a></td>
             </tr>
             {% endfor %}
         </tbody> 
