@@ -15,7 +15,8 @@ from .views import (dashboard_main_view,
                     asset_group_address_view,
                     dashboard_info_view,
                     dashboard_score_view,
-                    asset_group_scan_view
+                    asset_group_scan_view,
+                    download_view
                     )
 
 app_name = "dashboard"
@@ -30,7 +31,8 @@ urlpatterns = [
     path("assets/create", view=asset_group_create_view, name="create asset group"),
     path("assets/manage/<slug:groupid>/", view=asset_group_manage_view, name="manage asset group"),
     path("assets/<slug:groupid>", view=asset_group_address_view, name="group address view"),
-     path("assets/<slug:groupid>/scan", view=asset_group_scan_view, name="group scan view"),
+    path("assets/<slug:groupid>/scan", view=asset_group_scan_view, name="group scan view"),
+    path("download/<slug:downloadtype>/<slug:downloadvalue>", view=download_view, name="download view"),
     url(r'^scan/(?P<slug>[\w-]+)/manage/$', view=dashboard_manage_scan_view, name="manage scan"),
     url(r'^scan/(?P<slug>[\w-]+)/(?P<cveid>[\w-]+)/$', view=dashboard_cve_details, name="cve details"),
     url(r'^scan/(?P<slug>[\w-]+)/$', view=dashboard_scan_details, name="scan details"),

@@ -21,6 +21,7 @@
             <tr>
                 <th>Address</th>
                 <th>Details</th>
+                <th>Download</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,7 @@
                 <td>{{ ip.0 }}</td>
                 {% load to_ip_format %}
                 <td><a class="btn btn-primary" href="/addresses/{{ ip.1|to_ip_format }}">Details</a></td>
+                <td><a class="btn btn-primary" href="/download/address/{{ ip.1|to_ip_format }}">Download Report</a></td>
             </tr>
             {% endfor %}
         </tbody> 

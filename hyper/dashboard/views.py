@@ -4,11 +4,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.checks.messages import Critical
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm, AssetScanForm
 from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
+from django.views.static import serve
+import os
+from django.http import HttpResponse, Http404
+from wsgiref.util import FileWrapper
 
 
 User = get_user_model()
@@ -58,25 +62,28 @@ class ScanView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
-            
+            all_scan_ips = parse_scan_addresses(form.cleaned_data['address'])[0]
             for group_name in form.cleaned_data['asset_groups']:
                 gid = get_group_id(self.request.user.id, group_name)
-                for ip in parse_scan_addresses(form.cleaned_data['address'])[0]:
-                    add_asset_to_group(ip, self.request.user.id, gid)
+                group_ips = get_assets(self.request.user.id, gid)
+                for ip in group_ips:
+                    all_scan_ips.append(ip)
             """
             Check to see if there are old scan results that have the same addresses
             and delete them, there could be other possible solutions to this
             as this will remove results from older scans
             """
-            delete_old_addresses(parse_scan_addresses(form.cleaned_data['address'])[0])
+            delete_old_addresses(all_scan_ips)
             slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
 
+            
+            
             """
             Im not sure how to calculate the percent of the work done so for now we
             print a message after they submit the scan saying its running in the background
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            scan_all(all_scan_ips,slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
@@ -275,6 +282,51 @@ class AssetScanView(LoginRequiredMixin, TemplateView):
 
         return self.render_to_response(context)
 
+class TempDownloadView(LoginRequiredMixin, View):
+    template_name = 'dashboard/download/download.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['download_type'] = self.kwargs['downloadtype']
+        file_path = '/tmp/test.csv'
+        
+            
+        return context
+
+class FileDownloadView(View):
+    # Set FILE_STORAGE_PATH value in settings.py
+    
+    # Here set the name of the file with extension
+    file_name = '/tmp/report.csv'
+    # Set the content type value
+    content_type_value = 'text/csv'
+
+    def get(self, request, downloadtype, downloadvalue):
+        if downloadtype == 'address':
+            data = num_cves(request.user.id).filter(ip=downloadvalue.replace('-', '.'))
+            write_data_to_csv([data])
+        elif downloadtype == 'scan':
+            data = get_scan_data(downloadvalue[5:], request.user.id)
+            write_data_to_csv([data])
+        elif downloadtype == 'group':
+            members = get_assets(self.request.user.id, downloadvalue)
+            data = get_cve_for_multiple_address(request.user.id, members)
+            write_data_to_csv(data)
+
+        file_path = self.file_name
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(
+                    fh.read(),
+                    content_type="text/csv"
+                )
+                response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            return response
+        else:
+            raise Http404
+
+class DownloadView(FileDownloadView):
+    file_name = '/tmp/report.csv'
+
 dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
@@ -290,3 +342,4 @@ asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
 dashboard_score_view = DashboardScoreView.as_view()
 asset_group_scan_view = AssetScanView.as_view()
+download_view = FileDownloadView.as_view()
