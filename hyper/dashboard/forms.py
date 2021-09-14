@@ -1,6 +1,7 @@
 from django import forms
+from django.db.models import fields
 from django.forms.widgets import HiddenInput
-from .models import asset, port_info, asset_group
+from .models import asset, port_info, asset_group, address
 class ScanForm(forms.Form):
     #name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}))
     scan_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Scan Name'}))
@@ -38,10 +39,10 @@ class CreateAssetGroup(forms.Form):
 class AddAssetForm(forms.Form):
     def __init__(self, user, *args, **kwargs):
         super(AddAssetForm, self).__init__(*args,**kwargs)
-        self.fields['Add Addresses'] = forms.MultipleChoiceField(
+        self.fields['Add_Addresses'] = forms.MultipleChoiceField(
             choices=[(ip['ip'], ip['ip']) for ip in port_info.objects.filter(user=user).values('ip').distinct()],
         )
-        self.fields['Add Addresses'].widget.attrs.update({'class':'form-control select2-selection--multiple','multiple': ''})
+        #self.fields['Add Addresses'].widget.attrs.update({'class':'form-control select2-selection--multiple','multiple': ''})
 
 class DeleteAssetForm(forms.Form):
     def __init__(self, user,groupid, *args, **kwargs):

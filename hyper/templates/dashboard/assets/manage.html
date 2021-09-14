@@ -26,7 +26,10 @@
         <h2>Add Address to Group</h2>
         <form action="/assets/manage/{{ gid }}/" method="POST">
             {% csrf_token %}
-            {{ add_asset_form }}
+            <div>
+                {{ add_asset_form.as_p }}
+            </div>
+            
             <input type="Submit" name = 'add' value="Submit" class="btn btn-primary mt-1">
         </form>
         <h2>Remove Address from Group</h2>
@@ -42,12 +45,19 @@
             <button type="submit" value="Delete" class="btn btn-primary" name="remove" id="remove">Delete</button>
         </form>
     </div>
-</div> <!-- container -->
+</div>
+<script
+  src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous"></script>
+<!-- container -->
 
-<script>
-    setInterval(function(){
-        $("button[class$='select2-selection__choice__remove']").replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
-    },1);
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_Add_Addresses').selectize({
+
+        });
+    });
 </script>
 {% endblock %}
 
