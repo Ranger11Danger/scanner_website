@@ -275,6 +275,21 @@ class AssetScanView(LoginRequiredMixin, TemplateView):
 
         return self.render_to_response(context)
 
+class DownloadView(LoginRequiredMixin, TemplateView):
+    template_name = 'dashboard/download/download.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['download_type'] = self.kwargs['downloadtype']
+        if self.kwargs['downloadtype'] == 'address':
+            data = num_cves(self.request.user.id).filter(ip=self.kwargs['downloadvalue'])
+        elif self.kwargs['downloadtype'] == 'scan':
+            data = get_scan_data(self.kwargs['downloadvalue'][5:], self.request.user.id)
+        elif self.kwargs['downloadtype'] == 'group':
+            members = get_assets(self.request.user.id, self.kwargs['downloadvalue'])
+            data = get_cve_for_multiple_address(self.request.user.id, members)
+            
+        return context
+
 dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
 dashboard_scan_view = ScanView.as_view()
@@ -290,3 +305,4 @@ asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
 dashboard_score_view = DashboardScoreView.as_view()
 asset_group_scan_view = AssetScanView.as_view()
+download_view = DownloadView.as_view()

@@ -1,0 +1,18 @@
+{% extends "vertical_base.html" %}
+{% load static i18n %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<!-- Start Content-->
+<div class="container-fluid">
+    {% if download_type == 'group' %}
+        <h1>Download Group Report</h1>
+    {% elif download_type == 'scan' %}
+        <h1>Download Scan Report</h1>
+    {% elif download_type == 'address'%}
+        <h1>Download Address Report</h1>
+    {% endif %}
+</div> <!-- container -->
+{% endblock %}
+

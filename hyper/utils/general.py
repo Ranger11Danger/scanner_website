@@ -228,3 +228,9 @@ def parse_scan_addresses(addresses):
 def delete_old_addresses(address_list):
     for address in address_list:
         port_info.objects.filter(ip = address).delete()
+
+def get_cve_for_multiple_address(user,address_list):
+    data = []
+    for address in address_list:
+        data.append(num_cves(user).filter(ip=address))
+    return data
