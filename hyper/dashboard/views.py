@@ -159,7 +159,7 @@ class CreateAssetGroupView(LoginRequiredMixin, TemplateView):
         form = CreateAssetGroup(self.request.user.id, request.POST)
         if form.is_valid():
             gid = create_asset_group(request.user.id, form.cleaned_data['name'])
-            addresses = form.cleaned_data['Add Addresses']
+            addresses = form.cleaned_data['Add_Addresses']
             for ip in addresses:
                 add_asset_to_group(ip, self.request.user.id, gid)
             return redirect('/assets/')
@@ -195,7 +195,7 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
             
             if form.is_valid():
                 print(form.cleaned_data)
-                for x in form.cleaned_data['Remove Addresses']:
+                for x in form.cleaned_data['Remove_Addresses']:
                     if x != "None":
                         del_asset_from_group(request.user.id, self.kwargs['groupid'], x)
                 return redirect("/assets/")

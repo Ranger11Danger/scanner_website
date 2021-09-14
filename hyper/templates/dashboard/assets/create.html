@@ -29,10 +29,14 @@
         </div>
     </div>
 </div>
-<script>
-    setInterval(function(){
-        $("button[class$='select2-selection__choice__remove']").replaceWith("<span class='select2-selection__choice__remove' role='presentation'>×</span>")
-    },1);
+<script
+  src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#id_Add_Addresses').selectize();
+    });
 </script> <!-- container -->
 {% endblock %}
 

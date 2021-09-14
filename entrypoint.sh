@@ -9,6 +9,7 @@ echo "PostgreSQL started"
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 python3 manage.py migrate
+rm -rf /usr/src/app/staticfiles
 python3 manage.py collectstatic
 python3 manage.py shell -c "from hyper.users.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')"
 redis-server --daemonize yes
