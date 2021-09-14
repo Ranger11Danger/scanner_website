@@ -4,11 +4,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.checks.messages import Critical
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from .forms import ScanForm, RenameScanForm, CreateAssetGroup, AddAssetForm, DeleteAssetForm, AssetScanForm
 from hyper.utils.general import *
 from .tasks import go_to_sleep
 from django.shortcuts import redirect
+from django.views.static import serve
+import os
+from django.http import HttpResponse, Http404
+from wsgiref.util import FileWrapper
 
 
 User = get_user_model()
@@ -275,20 +279,50 @@ class AssetScanView(LoginRequiredMixin, TemplateView):
 
         return self.render_to_response(context)
 
-class DownloadView(LoginRequiredMixin, TemplateView):
+class TempDownloadView(LoginRequiredMixin, View):
     template_name = 'dashboard/download/download.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['download_type'] = self.kwargs['downloadtype']
-        if self.kwargs['downloadtype'] == 'address':
-            data = num_cves(self.request.user.id).filter(ip=self.kwargs['downloadvalue'])
-        elif self.kwargs['downloadtype'] == 'scan':
-            data = get_scan_data(self.kwargs['downloadvalue'][5:], self.request.user.id)
-        elif self.kwargs['downloadtype'] == 'group':
-            members = get_assets(self.request.user.id, self.kwargs['downloadvalue'])
-            data = get_cve_for_multiple_address(self.request.user.id, members)
+        file_path = '/tmp/test.csv'
+        
             
         return context
+
+class FileDownloadView(View):
+    # Set FILE_STORAGE_PATH value in settings.py
+    
+    # Here set the name of the file with extension
+    file_name = '/tmp/report.csv'
+    # Set the content type value
+    content_type_value = 'text/csv'
+
+    def get(self, request, downloadtype, downloadvalue):
+        if downloadtype == 'address':
+            data = num_cves(request.user.id).filter(ip=downloadvalue.replace('-', '.'))
+            write_data_to_csv([data])
+        elif downloadtype == 'scan':
+            data = get_scan_data(downloadvalue[5:], request.user.id)
+            write_data_to_csv([data])
+        elif downloadtype == 'group':
+            members = get_assets(self.request.user.id, downloadvalue)
+            data = get_cve_for_multiple_address(request.user.id, members)
+            write_data_to_csv(data)
+
+        file_path = self.file_name
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(
+                    fh.read(),
+                    content_type="text/csv"
+                )
+                response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(file_path)
+            return response
+        else:
+            raise Http404
+
+class DownloadView(FileDownloadView):
+    file_name = '/tmp/report.csv'
 
 dashboard_info_view = DashboardInfoView.as_view()
 dashboard_manage_scan_view = ScanManageView.as_view()
@@ -305,4 +339,4 @@ asset_group_manage_view = ManageAssetGroupView.as_view()
 asset_group_address_view = AssetGroupAddressView.as_view()
 dashboard_score_view = DashboardScoreView.as_view()
 asset_group_scan_view = AssetScanView.as_view()
-download_view = DownloadView.as_view()
+download_view = FileDownloadView.as_view()

@@ -3,6 +3,7 @@ from hyper.dashboard.models import scan, port_info, asset_group, asset
 from .process_scan import read_scan
 import ipaddress 
 from ipaddress import ip_address
+import csv
 class GenericObject(dict):
     """
     A dict subclass that provides access to its members as if they were
@@ -234,3 +235,13 @@ def get_cve_for_multiple_address(user,address_list):
     for address in address_list:
         data.append(num_cves(user).filter(ip=address))
     return data
+
+def write_data_to_csv(data):
+    filename = "/tmp/report.csv"
+    with open(filename, 'w') as csvfile:
+        fields = ['cve', 'ip','port', 'name', 'score', 'description', 'solution']
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fields)
+        for queryset in data:
+            rows = [[x.cve, x.ip, x.port, x.name, x.score, x.description, x.solution] for x in queryset]
+            csvwriter.writerows(rows)
