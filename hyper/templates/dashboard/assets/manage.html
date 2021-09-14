@@ -27,15 +27,15 @@
         <form action="/assets/manage/{{ gid }}/" method="POST">
             {% csrf_token %}
             {{ add_asset_form }}
-            
             <input type="Submit" name = 'add' value="Submit" class="btn btn-primary mt-1">
         </form>
         <h2>Remove Address from Group</h2>
         <form action="/assets/manage/{{ gid }}/" method="POST">
             {% csrf_token %}
             {{ del_asset_form }}
-            <input type="Submit" value="Submit" class="btn btn-primary" name="delete" id="del">
+            <input type="Submit" value="Submit" class="btn btn-primary mt-1" name="delete" id="del">
         </form>
+        
         <form method="post" action="/assets/manage/{{ gid }}/">
             {% csrf_token %}
             <label for="remove" class="mt-2">Delete Asset Group</label><br>
