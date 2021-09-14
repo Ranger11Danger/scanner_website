@@ -62,25 +62,28 @@ class ScanView(LoginRequiredMixin, TemplateView):
         if form.is_valid():
             context['address'] = parse_scan_addresses(form.cleaned_data['address'])[1]
             context['scan_name'] = form.cleaned_data['scan_name']
-            
+            all_scan_ips = parse_scan_addresses(form.cleaned_data['address'])[0]
             for group_name in form.cleaned_data['asset_groups']:
                 gid = get_group_id(self.request.user.id, group_name)
-                for ip in parse_scan_addresses(form.cleaned_data['address'])[0]:
-                    add_asset_to_group(ip, self.request.user.id, gid)
+                group_ips = get_assets(self.request.user.id, gid)
+                for ip in group_ips:
+                    all_scan_ips.append(ip)
             """
             Check to see if there are old scan results that have the same addresses
             and delete them, there could be other possible solutions to this
             as this will remove results from older scans
             """
-            delete_old_addresses(parse_scan_addresses(form.cleaned_data['address'])[0])
+            delete_old_addresses(all_scan_ips)
             slug = add_scan(request.user.id, form.cleaned_data['scan_name'],parse_scan_addresses(form.cleaned_data['address'])[1])
 
+            
+            
             """
             Im not sure how to calculate the percent of the work done so for now we
             print a message after they submit the scan saying its running in the background
             """
             #context['task_id'] = convert_scan_to_model(form.cleaned_data['name'], slug[5:])
-            scan_all(parse_scan_addresses(form.cleaned_data['address'])[0],slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
+            scan_all(all_scan_ips,slug[5:],form.cleaned_data['ports'], form.cleaned_data['custom_range'])
             context['scan_status'] = "scanning"
             
 
