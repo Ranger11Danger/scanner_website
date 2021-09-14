@@ -19,7 +19,7 @@ class ScanForm(forms.Form):
             choices = [(group['name'], group['name']) for group in asset_group.objects.filter(user=user).values('name').distinct()],
             required=False
             )
-        self.fields['asset_groups'].widget.attrs.update({'class':'select2 form-control select2-multiple', 'data-toggle' : 'select2', 'multiple' : 'multiple'})
+        self.fields['asset_groups'].widget.attrs.update({'class':'form-control select2-selection--multiple','multiple': ''})
 
 class RenameScanForm(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'New Name'}))
@@ -32,7 +32,7 @@ class CreateAssetGroup(forms.Form):
             choices=[(ip['ip'], ip['ip']) for ip in port_info.objects.filter(user=user).values('ip').distinct()],
             required=False
         )
-        self.fields['Add Addresses'].widget.attrs.update({'class':'select2 form-control select2-multiple', 'data-toggle' : 'select2', 'multiple' : 'multiple'})
+        self.fields['Add Addresses'].widget.attrs.update({'class':'form-control select2-selection--multiple','multiple': ''})
 
 
 class AddAssetForm(forms.Form):
