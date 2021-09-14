@@ -9,5 +9,7 @@ def to_scan_address_format(value):
         return f"{ips[0]}, {ips[1]}, ..."
     elif len(ips) == 2:
          return f"{ips[0]}, {ips[1]}"
-    else:
+    elif len(ips) == 1:
         return f'{ips[0]}'
+    else:
+        return 'None'
