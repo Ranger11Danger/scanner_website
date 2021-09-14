@@ -186,7 +186,7 @@ class ManageAssetGroupView(LoginRequiredMixin, TemplateView):
         if request.POST.get('add'):
             form = AddAssetForm(request.user.id, request.POST)
             if form.is_valid():
-                for x in form.cleaned_data['Add Addresses']:
+                for x in form.cleaned_data['Add_Addresses']:
                     if x != "None":
                         add_asset_to_group(x, request.user.id, self.kwargs['groupid'])
                 return redirect("/assets/")
