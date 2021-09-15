@@ -74,7 +74,7 @@ class ScanView(LoginRequiredMixin, TemplateView):
             as this will remove results from older scans
             """
             delete_old_addresses(all_scan_ips)
-            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],all_scan_ips)
+            slug = add_scan(request.user.id, form.cleaned_data['scan_name'],all_scan_ips, generate_scan_display_address(all_scan_ips))
 
             
             

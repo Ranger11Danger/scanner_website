@@ -31,7 +31,7 @@
             <tr>
                 {% load to_scan_address_format %}
                 <td><h5>{{ scan.name }}</h5></td>
-                <td>{{ scan.address|to_scan_address_format }}</td>
+                <td>{{ scan.address_display }}</td>
                 <td>{{ scan.created_at }}</td>
                 <td><a class="btn btn-primary" href="/dashboard/scan/{{ scan.slug }}">Details</a></td>
                 <td><a class="btn btn-primary" href="/download/scan/{{ scan.slug }}">Download Report</a></td>

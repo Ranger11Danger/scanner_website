@@ -83,12 +83,13 @@ def list_scans():
     scans = scan.objects.all()
     return(scans)
 
-def add_scan(user, name, address):
+def add_scan(user, name, address, display_address):
     new_scan = scan()
     new_scan.user = user
     new_scan.name = name
     new_scan.slug = f"scan-{new_scan.uuid}"
     new_scan.address = address
+    new_scan.address_display = display_address
     new_scan.save()
     return new_scan.slug
 
@@ -245,3 +246,13 @@ def write_data_to_csv(data):
         for queryset in data:
             rows = [[x.cve, x.ip, x.port, x.name, x.score, x.description, x.solution] for x in queryset]
             csvwriter.writerows(rows)
+
+def generate_scan_display_address(ips):
+    if len(ips) > 2:
+        return f"{ips[0]}, {ips[1]}, ..."
+    elif len(ips) == 2:
+         return f"{ips[0]}, {ips[1]}"
+    elif len(ips) == 1:
+        return f'{ips[0]}'
+    else:
+        return 'None'

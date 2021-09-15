@@ -9,6 +9,7 @@ class scan(models.Model):
     slug = models.SlugField()
     address = models.TextField()
     created_at  = models.DateTimeField(auto_now_add=True)
+    address_display = models.TextField()
 
 class port_info(models.Model):
     cve = models.TextField()
