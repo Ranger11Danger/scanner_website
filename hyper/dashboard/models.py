@@ -16,7 +16,7 @@ class port_info(models.Model):
     ip = models.TextField()
     port = models.TextField()
     name = models.TextField()
-    score = models.IntegerField()
+    score = models.FloatField()
     description = models.TextField()
     solution = models.TextField()
     scan_id = models.SlugField()

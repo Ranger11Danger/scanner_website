@@ -8,7 +8,8 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 RUN apt-get update
-RUN apt-get install python3-pip -y
+RUN apt-get upgrade -y
+RUN apt-get install -y python3-pip
 RUN apt-get install libpq-dev -y
 RUN apt-get install netcat -y
 RUN apt install redis-server -y

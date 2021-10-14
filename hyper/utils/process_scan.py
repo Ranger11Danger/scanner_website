@@ -9,6 +9,7 @@ from hyper.dashboard.models import port_info
 from celery_progress.backend import ProgressRecorder
 import subprocess
 import os
+from .get_tenable_data import get_data
 
 API_KEY = '25fe06fb-0c6b-475a-9963-59767924c909'
 API_PASS = '53692957-ab54-4712-9716-884b10b82e1a'
@@ -71,26 +72,25 @@ def get_xforce_info(stdcode):
 
 @shared_task(bind=True)
 def process_cve(self,id , scan_port, address, slug):
-    data = get_xforce_info(id)
-    data = json.loads(data.text)
-    name = data[0]['title']
-    description = data[0]['description']
-    cvss = data[0]['risk_level']
-    solution = data[0]['remedy']
+    
+    description, solution, cvss = get_data(id)
+    
     try:
         port = port_info()
-        port.name = name
+        port.name = id
         port.cve = id
         port.port = scan_port
         port.ip = address
-        port.score = cvss
+        port.score = float(cvss)
         port.description = description
-        port.solution = solution
+        port.solution = f"https://www.tenable.com/cve/{id}"
         port.scan_id = slug
+        #TODO change this to set to current user not just admin
         port.user = int(1)
         port.save()
-    except:
-        pass
+    except Exception as e:
+        with open('/tmp/scan_log', 'wa') as file:
+            file.write("error")
 
     return "Done"
 @shared_task(bind=True)
