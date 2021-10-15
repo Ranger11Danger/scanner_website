@@ -71,7 +71,7 @@ def get_xforce_info(stdcode):
     return(data)
 
 @shared_task(bind=True)
-def process_cve(self,id , scan_port, address, slug):
+def process_cve(self,id , scan_port, address, slug,user_id):
     
     description, solution, cvss = get_data(id)
     
@@ -86,7 +86,7 @@ def process_cve(self,id , scan_port, address, slug):
         port.solution = f"https://www.tenable.com/cve/{id}"
         port.scan_id = slug
         #TODO change this to set to current user not just admin
-        port.user = int(1)
+        port.user = int(user_id)
         port.save()
     except Exception as e:
         with open('/tmp/scan_log', 'wa') as file:
@@ -94,7 +94,7 @@ def process_cve(self,id , scan_port, address, slug):
 
     return "Done"
 @shared_task(bind=True)
-def process_edb(self, id, scan_port, address, cve_text, uniq_list, slug):
+def process_edb(self, id, scan_port, address, cve_text, uniq_list, slug, user_id):
     cve = convert(id.split(":")[-1])
 
     if cve not in cve_text:
@@ -122,14 +122,14 @@ def process_edb(self, id, scan_port, address, cve_text, uniq_list, slug):
                 port.description = description
                 port.solution = solution
                 port.scan_id = slug
-                port.user = int(1)
+                port.user = int(user_id)
                 port.save()
             except:
                 pass
     return "Done"
         
 
-def read_scan(scan, slug):
+def read_scan(scan, slug, user_id):
     scan_result = parseXML(scan)
     #progress_recorder = ProgressRecorder(self)
     cve_list = filter_results('cve', scan_result)
@@ -139,13 +139,13 @@ def read_scan(scan, slug):
     temp = 0
     for cve in cve_list:
         #progress_recorder.set_progress(temp + 1, scan_len)
-        process_cve.delay(cve.id, cve.port, cve.address, slug)
+        process_cve.delay(cve.id, cve.port, cve.address, slug, user_id)
         sleep(.5)
         temp += 1
     uniq_list = cve_text
     for edbid in edb_list:
         #progress_recorder.set_progress(temp+ 1, scan_len)
-        process_edb.delay(edbid.id, edbid.port, edbid.address, cve_text, uniq_list, slug)
+        process_edb.delay(edbid.id, edbid.port, edbid.address, cve_text, uniq_list, slug, user_id)
         temp += 1
         sleep(.5)
     return "Done"
@@ -153,7 +153,7 @@ def read_scan(scan, slug):
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @shared_task(bind=True)
-def scan_target(self, target, slug,ports, custom_ports):
+def scan_target(self, target, slug,ports, custom_ports, user_id):
     if ports == 'top':
         subprocess.run(["nmap","-sV","--script=vulners", target, "-oX", f"{BASE_DIR}/scans/{target}.xml"])
     elif ports == 'all':
@@ -161,8 +161,8 @@ def scan_target(self, target, slug,ports, custom_ports):
     else:
         subprocess.run(["nmap","-sV",f"-p {custom_ports}","--script=vulners", target, "-oX", f"{BASE_DIR}/scans/{target}.xml"])
 
-    read_scan(f"{BASE_DIR}/scans/{target}.xml", slug)
+    read_scan(f"{BASE_DIR}/scans/{target}.xml", slug, user_id)
 
-def scan_all(target_list, slug,ports, custom_ports):
+def scan_all(target_list, slug,ports, custom_ports, user_id):
     for target in target_list:
-        scan_target.delay(target, slug, ports, custom_ports)
+        scan_target.delay(target, slug, ports, custom_ports, user_id)
